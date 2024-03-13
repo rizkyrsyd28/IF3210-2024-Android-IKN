@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">IKN</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hello_trans_fragment">Hello trans fragment</string>
+    <string name="hello_scan_fragment">Hello scan fragment</string>
+    <string name="hello_graf_fragment">Hello graf fragment</string>
+    <string name="hello_setting_fragment">Hello setting fragment</string>
 </resources>
