@@ -1,4 +1,4 @@
-package com.example.ikn.ui
+package com.example.ikn.ui.Graf
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
