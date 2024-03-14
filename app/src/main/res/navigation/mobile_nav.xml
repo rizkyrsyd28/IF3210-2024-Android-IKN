@@ -21,8 +21,8 @@
         android:label="fragment_graf"
         tools:layout="@layout/fragment_graf" />
     <fragment
-        android:id="@+id/nav_setting"
-        android:name="com.example.ikn.ui.Setting.SettingFragment"
-        android:label="fragment_setting"
-        tools:layout="@layout/fragment_setting" />
+        android:id="@+id/nav_settings"
+        android:name="com.example.ikn.ui.Settings.SettingsFragment"
+        android:label="fragment_settings"
+        tools:layout="@layout/fragment_settings" />
 </navigation>
