@@ -4,10 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".TransactionFragment">
+    android:background="?colorSurface"
+    android:paddingHorizontal="18dp"
+    tools:context=".ui.transaction.TransactionFragment">
 
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?colorSurface"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

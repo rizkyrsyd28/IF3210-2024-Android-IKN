@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_transaction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/ic_bill"
+        android:title="Trasaction" />
+    <item
+        android:id="@+id/nav_scan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/ic_bill"
+        android:title="Scan" />
+    <item
+        android:id="@+id/nav_graf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/ic_bill"
+        android:title="Graf" />
+    <item
+        android:id="@+id/nav_settings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/ic_bill"
+        android:title="Settings" />
+</menu>
