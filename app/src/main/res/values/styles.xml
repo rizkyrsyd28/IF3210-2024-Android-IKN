@@ -6,4 +6,8 @@
         <item name="fontFamily">@font/urbanist_regular</item>
     </style>
 
+    <style name="Widget.MaterialComponents.BottomNavigationView.PrimarySurface.Custom" parent="Widget.MaterialComponents.BottomNavigationView.PrimarySurface">
+        <item name="android:background">?colorSecondaryContainer</item>
+    </style>
+
 </resources>

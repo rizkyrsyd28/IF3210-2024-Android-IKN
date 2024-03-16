@@ -11,12 +11,13 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.ikn.databinding.ActivityMainBinding
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        supportActionBar?.hide()
+        supportActionBar?.hide()
 
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -25,30 +26,24 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment
         val navController = navHostFragment.navController
 
+
         binding.bottomNavigationView.setupWithNavController(navController)
 
-//        val menu = binding.bottomNavigationView.menu
-//
-//        for (i in 0 until menu.size()) {
-//            val menuItem = menu.getItem(i)
-//            val actionView = LayoutInflater.from(this)
-//                .inflate(R.layout.bottom_navigation_item, null)
-//
-//            val icon = actionView.findViewById<ImageView>(R.id.icon)
-//            val title = actionView.findViewById<TextView>(R.id.title)
-//
-//            icon.setImageDrawable(menuItem.icon)
-//            title.text = menuItem.title
-//
-//            menuItem.actionView = actionView
-//        }
+        val toolbar = binding.toolbar
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            toolbar.title = destination.label
+                ?.split("_")
+                ?.findLast { _ ->
+                    true
+                }
+                ?.replaceFirstChar { it.uppercase() }
+        }
 
 //        setupActionBarWithNavController(navController, AppBarConfiguration(
 //            setOf(
 //                R.id.nav_scan,
 //                R.id.nav_transaction,
 //                R.id.nav_graf,
-//                R.id.nav_setting
 //            )
 //        )
 //        )

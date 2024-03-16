@@ -54,6 +54,9 @@ class TransactionFragment : Fragment() {
         val dummyTransactions = listOf(
             Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
             Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
+            Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta"),
+                    Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
+            Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
             Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta")
         )
 
