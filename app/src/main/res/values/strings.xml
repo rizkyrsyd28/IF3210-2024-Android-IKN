@@ -8,4 +8,10 @@
     <string name="hello_scan_fragment">Scan</string>
     <string name="hello_graf_fragment">Hello graf fragment</string>
     <string name="hello_setting_fragment">Hello setting fragment</string>
+    <string name="transaction">Transaction</string>
+    <string name="scan">Scan</string>
+    <string name="graph">Graph</string>
+    <string name="settings">Settings</string>
+    <string name="bottom_navigation_item_icon">Bottom navigation item icon</string>
+    <string name="total_transaction">Total Transaction</string>
 </resources>

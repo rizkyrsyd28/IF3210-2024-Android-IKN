@@ -5,13 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?colorSurface"
-    android:paddingHorizontal="18dp"
+    android:paddingTop="11dp"
+    android:paddingHorizontal="15dp"
     tools:context=".ui.transaction.TransactionFragment">
 
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="?colorSurface"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvTransaction"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?colorSurface" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

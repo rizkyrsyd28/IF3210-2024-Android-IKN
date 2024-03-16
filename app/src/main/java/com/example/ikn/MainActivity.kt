@@ -2,6 +2,10 @@ package com.example.ikn
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -22,6 +26,22 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
 
         binding.bottomNavigationView.setupWithNavController(navController)
+
+//        val menu = binding.bottomNavigationView.menu
+//
+//        for (i in 0 until menu.size()) {
+//            val menuItem = menu.getItem(i)
+//            val actionView = LayoutInflater.from(this)
+//                .inflate(R.layout.bottom_navigation_item, null)
+//
+//            val icon = actionView.findViewById<ImageView>(R.id.icon)
+//            val title = actionView.findViewById<TextView>(R.id.title)
+//
+//            icon.setImageDrawable(menuItem.icon)
+//            title.text = menuItem.title
+//
+//            menuItem.actionView = actionView
+//        }
 
 //        setupActionBarWithNavController(navController, AppBarConfiguration(
 //            setOf(
