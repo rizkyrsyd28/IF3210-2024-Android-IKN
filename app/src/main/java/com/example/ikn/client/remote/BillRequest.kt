@@ -11,5 +11,5 @@ import retrofit2.http.Part
 interface BillRequest {
     @Multipart
     @POST("bill/upload")
-    suspend fun post(@Part("file") file: MultipartBody.Part, @Header("Authorization") auth: String) : Response<BillResponse>
+    suspend fun post(@Part file: MultipartBody.Part, @Header("Authorization") auth: String) : Response<BillResponse>
 }
