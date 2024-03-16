@@ -53,9 +53,9 @@ class ScanFragment : Fragment() {
         val view = binding.root
 
         scanViewModel = ViewModelProvider(this, ScanViewModelFactory())[ScanViewModel::class.java]
-        scanViewModel.bill.observe(viewLifecycleOwner) { response ->
+        scanViewModel.getBill().observe(viewLifecycleOwner) { response ->
             val body = response.body()
-            Log.i(TAG, response.toString())
+            Log.i(TAG, body.toString())
         }
         return view
     }
