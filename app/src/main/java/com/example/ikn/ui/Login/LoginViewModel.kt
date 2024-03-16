@@ -1,7 +1,32 @@
 package com.example.ikn.ui.Login
 
+import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.ikn.model.response.LoginResponse
+import com.example.ikn.repository.Repository
+import kotlinx.coroutines.launch
+import retrofit2.Response
 
-class LoginViewModel : ViewModel() {
-    // TODO: Implement the ViewModel
+class LoginViewModel(private val repo: Repository) : ViewModel() {
+
+    private val _authorized : MutableLiveData<Boolean> = MutableLiveData<Boolean>(false)
+    val authorized : LiveData<Boolean> = _authorized
+
+    fun loginHandler(email: String, password: String) = viewModelScope.launch {
+        val res: Response<LoginResponse> = repo.postLogin(email, password)
+
+        if (res.isSuccessful) {
+            _authorized.value = true
+            Log.i("[VM: LOGIN]" ,"${res.body()?.token}")
+        } else {
+            _authorized.value = false
+            Log.i("[VM: LOGIN]" ,"${res.code()}")
+        }
+    }
+
+
+
 }

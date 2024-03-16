@@ -1,5 +1,5 @@
 package com.example.ikn.ui.transaction
 
-data class Transaction(
-
-)
+//data class Transaction(
+//
+//)
