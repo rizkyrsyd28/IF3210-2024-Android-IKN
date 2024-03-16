@@ -1,38 +1,40 @@
 package com.example.ikn
 
-import android.media.Image
-import com.example.ikn.client.remote.HttpClient
-import org.junit.Test
-
-import org.junit.Assert.*
+import com.example.ikn.repository.Repository
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
-import retrofit2.Retrofit
+import org.junit.Test
 import java.io.File
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 class APIUnitTest {
-    private lateinit var client : HttpClient
-    @Before
-    fun instanceClient(){
-        client = HttpClient
-//        try {
-//            client = HttpClient
-//        } catch (err: Error) {
-//            println(err)
-//        }
-    }
+    private var token : String = ""
 
-    fun post(file: File) {
-        client.postBill(file)
+    @Test
+    fun loginAPI() {
+        runBlocking {
+            val repo = Repository()
+            val data = repo.postLogin("13521109@std.stei.itb.ac.id", "password_13521109")
+            println("${data.body()?.token}")
+            token = data.body()?.token as String
+        }
     }
 
     @Test
     fun uploadAPI() {
-        val img = File("C:/Users/LENOVO/Pictures/Abang2an.png")
-        client.postBill(img)
+        runBlocking {
+            val repo = Repository()
+            val file = File("C:/Users/sadda/OneDrive - Institut Teknologi Bandung/Pictures/Screenshots/Screenshot 2024-03-10 172607.png")
+            val res = repo.postBill(file, token)
+            println("data - ${res.body()}")
+        }
+    }
+
+    @Test
+    fun tokenAPI() {
+        runBlocking {
+            val repo = Repository()
+            val data = repo.postToken(token)
+            println("Tokenz ${data.body()}")
+        }
     }
 }
