@@ -7,7 +7,7 @@ object HttpClient {
 
     private val retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl("https://pbd-backend-2024.vercel.app/api")
+            .baseUrl("https://pbd-backend-2024.vercel.app/api/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
