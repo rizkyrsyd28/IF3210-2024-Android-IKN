@@ -23,7 +23,7 @@ class APIUnitTest {
     fun uploadAPI() {
         runBlocking {
             val repo = Repository()
-            val file = File("C:/Users/LENOVO/Downloads/Screenshot 2024-03-11 034122.png")
+            val file = File("C:/Users/sadda/OneDrive - Institut Teknologi Bandung/Pictures/Screenshots/Screenshot 2024-03-10 172607.png")
             val res = repo.postBill(file, token)
             println("data - ${res.body()}")
         }
