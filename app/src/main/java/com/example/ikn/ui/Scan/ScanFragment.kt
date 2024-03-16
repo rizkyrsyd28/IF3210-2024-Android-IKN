@@ -2,7 +2,6 @@ package com.example.ikn.ui.Scan
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.media.Image
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -22,25 +21,21 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.example.ikn.databinding.FragmentScanBinding
 import java.io.File
-import java.io.FileOutputStream
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class ScanFragment : Fragment() {
     private lateinit var cameraProvider: ProcessCameraProvider
     private lateinit var imageCapture: ImageCapture
     private lateinit var pickMedia: ActivityResultLauncher<PickVisualMediaRequest>;
+    private lateinit var scanViewModel: ScanViewModel
 
     private var _binding: FragmentScanBinding? = null
     private val binding get() = _binding!!
 
-
-
     companion object {
         private const val TAG = "CameraFragment"
-        private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
         private val REQUIRED_PERMISSIONS =
             mutableListOf (
                 Manifest.permission.CAMERA
@@ -56,6 +51,12 @@ class ScanFragment : Fragment() {
     ): View {
         _binding = FragmentScanBinding.inflate(inflater, container, false)
         val view = binding.root
+
+        scanViewModel = ViewModelProvider(this, ScanViewModelFactory())[ScanViewModel::class.java]
+        scanViewModel.bill.observe(viewLifecycleOwner) { response ->
+            val body = response.body()
+            Log.i(TAG, response.toString())
+        }
         return view
     }
 
@@ -65,17 +66,23 @@ class ScanFragment : Fragment() {
         if (allPermissionsGranted()) {
             pickImage()
             startCamera()
+            binding.snapButton.setOnClickListener {
+                captureImage()
+            }
         } else {
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
                 if (isGranted) {
                     Log.i("DEBUG", "permission granted")
+                    pickImage()
+                    startCamera()
+                    binding.snapButton.setOnClickListener {
+                        captureImage()
+                    }
                 } else {
+                    Toast.makeText(requireContext(), "Camera permission denied", Toast.LENGTH_SHORT).show()
                     Log.i("DEBUG", "permission denied")
                 }
             }
-        }
-        binding.snapButton.setOnClickListener {
-            captureImage()
         }
     }
 
@@ -123,7 +130,10 @@ class ScanFragment : Fragment() {
         imageCapture.takePicture(ContextCompat.getMainExecutor(requireContext()), object: ImageCapture.OnImageCapturedCallback() {
             override fun onCaptureSuccess(image: ImageProxy) {
                 val bitmap = image.toBitmap()
+                val imageFile = scanViewModel.createFileFromProxyImg(image, requireContext().cacheDir)
                 image.close()
+
+                scanViewModel.doPostBill(imageFile)
 
                 // Display the captured image to the user
                 binding.mainCameraFrame.setImageBitmap(bitmap)
@@ -135,20 +145,6 @@ class ScanFragment : Fragment() {
                 Toast.makeText(requireContext(), "Error capturing image", Toast.LENGTH_SHORT).show()
             }
         })
-    }
-
-    private fun createImageFile(image: ImageProxy): File {
-        val timeStamp = SimpleDateFormat(FILENAME_FORMAT, Locale.getDefault()).format(System.currentTimeMillis())
-        val storageDir = requireContext().cacheDir
-        val tempFile = File.createTempFile("IMG_$timeStamp", ".jpg", storageDir)
-
-        FileOutputStream(tempFile).use { outputStream ->
-            val buffer = image.planes[0].buffer
-            val bytes = ByteArray(buffer.remaining())
-            buffer.get(bytes)
-            outputStream.write(bytes)
-        }
-        return tempFile
     }
 
     fun pickImage() {
@@ -170,6 +166,7 @@ class ScanFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        cameraProvider.unbindAll()
         _binding = null
     }
 }
