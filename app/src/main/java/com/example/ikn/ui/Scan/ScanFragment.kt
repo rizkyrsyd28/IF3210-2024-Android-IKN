@@ -1,20 +1,19 @@
 package com.example.ikn.ui.Scan
 
 import android.Manifest
-import android.content.ContentValues
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
+import android.media.Image
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -22,17 +21,22 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.example.ikn.databinding.FragmentScanBinding
 import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 class ScanFragment : Fragment() {
     private lateinit var cameraProvider: ProcessCameraProvider
     private lateinit var imageCapture: ImageCapture
+    private lateinit var pickMedia: ActivityResultLauncher<PickVisualMediaRequest>;
 
     private var _binding: FragmentScanBinding? = null
     private val binding get() = _binding!!
+
+
 
     companion object {
         private const val TAG = "CameraFragment"
@@ -59,6 +63,7 @@ class ScanFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         if (allPermissionsGranted()) {
+            pickImage()
             startCamera()
         } else {
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -115,9 +120,6 @@ class ScanFragment : Fragment() {
     private fun captureImage() {
         val imageCapture = imageCapture ?: return
 
-        val photoFile = createImageFile()
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
         imageCapture.takePicture(ContextCompat.getMainExecutor(requireContext()), object: ImageCapture.OnImageCapturedCallback() {
             override fun onCaptureSuccess(image: ImageProxy) {
                 val bitmap = image.toBitmap()
@@ -135,12 +137,36 @@ class ScanFragment : Fragment() {
         })
     }
 
-    private fun createImageFile(): File {
+    private fun createImageFile(image: ImageProxy): File {
         val timeStamp = SimpleDateFormat(FILENAME_FORMAT, Locale.getDefault()).format(System.currentTimeMillis())
-        val storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        println(storageDir)
-        return File.createTempFile("IMG_$timeStamp", ".jpg", storageDir)
+        val storageDir = requireContext().cacheDir
+        val tempFile = File.createTempFile("IMG_$timeStamp", ".jpg", storageDir)
+
+        FileOutputStream(tempFile).use { outputStream ->
+            val buffer = image.planes[0].buffer
+            val bytes = ByteArray(buffer.remaining())
+            buffer.get(bytes)
+            outputStream.write(bytes)
+        }
+        return tempFile
     }
+
+    fun pickImage() {
+        pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            if (uri != null) {
+                val file = File(uri.path);
+                binding.mainCameraFrame.setImageURI(uri)
+                Log.d("PhotoPicker", "Selected URI: $uri")
+            } else {
+                Log.d("PhotoPicker", "No media selected")
+            }
+        }
+
+        binding.uploadButton.setOnClickListener{
+            pickMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
+        }
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
