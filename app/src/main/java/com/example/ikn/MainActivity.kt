@@ -26,27 +26,16 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment
         val navController = navHostFragment.navController
 
-
         binding.bottomNavigationView.setupWithNavController(navController)
 
-        val toolbar = binding.toolbar
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            toolbar.title = destination.label
+            binding.toolbar.text = destination.label
                 ?.split("_")
                 ?.findLast { _ ->
                     true
                 }
                 ?.replaceFirstChar { it.uppercase() }
         }
-
-//        setupActionBarWithNavController(navController, AppBarConfiguration(
-//            setOf(
-//                R.id.nav_scan,
-//                R.id.nav_transaction,
-//                R.id.nav_graf,
-//            )
-//        )
-//        )
 
     }
 }
