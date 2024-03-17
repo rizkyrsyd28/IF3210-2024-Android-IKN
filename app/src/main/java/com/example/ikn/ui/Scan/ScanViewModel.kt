@@ -1,5 +1,6 @@
 package com.example.ikn.ui.Scan
 
+import android.content.Context
 import android.net.Uri
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.LiveData
@@ -12,11 +13,11 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Locale
 import com.example.ikn.repository.Repository
+import com.example.ikn.utils.SharedPreferencesManager
 import kotlinx.coroutines.launch
-import retrofit2.Response
 
 class ScanViewModel(): ViewModel() {
-    private val bill: MutableLiveData<Response<BillResponse>> = MutableLiveData()
+    private val bill: MutableLiveData<BillResponse> = MutableLiveData()
     private val repository = Repository()
 
     companion object {
@@ -24,13 +25,14 @@ class ScanViewModel(): ViewModel() {
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
     }
 
-    fun getBill(): LiveData<Response<BillResponse>> {
+    fun getBill(): LiveData<BillResponse?> {
         return bill
     }
 
     fun createFileFromProxyImg(image: ImageProxy, cacheDir: File): File {
         val timeStamp = SimpleDateFormat(FILENAME_FORMAT, Locale.getDefault()).format(System.currentTimeMillis())
-        val tempFile = File.createTempFile("IMG_$timeStamp", ".jpg", cacheDir)
+        val tempPath = kotlin.io.path.createTempFile(cacheDir.toPath(), "IMG_$timeStamp", ".jpg")
+        val tempFile = tempPath.toFile()
 
         FileOutputStream(tempFile).use { outputStream ->
             val buffer = image.planes[0].buffer
@@ -45,13 +47,17 @@ class ScanViewModel(): ViewModel() {
         return File(uri.path)
     }
 
-    fun doPostBill(file: File) = viewModelScope.launch {
+    fun doPostBill(file: File, context: Context) = viewModelScope.launch {
         try {
-//            TODO("change hardcoded token")
-            val token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuaW0iOiIxMzUyMTEwOSIsImlhdCI6MTcxMDU4Nzk0OCwiZXhwIjoxNzEwNTg4MjQ4fQ.q4HG8Ed92q_oYQTg5l_lhOEVBZQDWdDP3EHW4ncXsYs"
-            val response = repository.postBill(file, token)
-            bill.value = response
+            val sharedPref = SharedPreferencesManager(context)
+            val token = sharedPref.getString("TOKEN")
 
+            var fetchedBill : BillResponse? = null
+            if (!token.isNullOrBlank()) {
+                val response = repository.postBill(file, token)
+                fetchedBill = response.body()
+            }
+            bill.value = fetchedBill
         } catch (e: Exception) {
             e.printStackTrace()
         }

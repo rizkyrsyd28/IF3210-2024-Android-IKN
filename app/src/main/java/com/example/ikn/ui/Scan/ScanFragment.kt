@@ -1,6 +1,8 @@
 package com.example.ikn.ui.Scan
 
 import android.Manifest
+import android.app.AlertDialog
+import android.app.ProgressDialog
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -8,6 +10,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
@@ -23,7 +26,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.ikn.databinding.FragmentScanBinding
-import java.io.File
+import com.example.ikn.model.response.item.Items
+
 
 class ScanFragment : Fragment() {
     private lateinit var cameraProvider: ProcessCameraProvider
@@ -54,8 +58,12 @@ class ScanFragment : Fragment() {
 
         scanViewModel = ViewModelProvider(this, ScanViewModelFactory())[ScanViewModel::class.java]
         scanViewModel.getBill().observe(viewLifecycleOwner) { response ->
-            val body = response.body()
-            Log.i(TAG, body.toString())
+            binding.progressBarCyclic.visibility = View.GONE
+            if (response != null) {
+                creataDialog(response.items)
+            } else {
+                creataDialog(null)
+            }
         }
         return view
     }
@@ -129,15 +137,11 @@ class ScanFragment : Fragment() {
 
         imageCapture.takePicture(ContextCompat.getMainExecutor(requireContext()), object: ImageCapture.OnImageCapturedCallback() {
             override fun onCaptureSuccess(image: ImageProxy) {
-                val bitmap = image.toBitmap()
                 val imageFile = scanViewModel.createFileFromProxyImg(image, requireContext().cacheDir)
                 image.close()
 
-                scanViewModel.doPostBill(imageFile)
-
-                // Display the captured image to the user
-                binding.mainCameraFrame.setImageBitmap(bitmap)
-                binding.mainCameraFrame.rotation = image.imageInfo.rotationDegrees.toFloat()
+                scanViewModel.doPostBill(imageFile, requireContext())
+                binding.progressBarCyclic.visibility = View.VISIBLE
             }
 
             override fun onError(exception: ImageCaptureException) {
@@ -150,9 +154,16 @@ class ScanFragment : Fragment() {
     fun pickImage() {
         pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
             if (uri != null) {
-                val file = File(uri.path);
-                binding.mainCameraFrame.setImageURI(uri)
-                Log.d("PhotoPicker", "Selected URI: $uri")
+                val file = kotlin.io.path.createTempFile().toFile()
+                uri?.let { requireContext().contentResolver.openInputStream(it) }.use { input ->
+                    file.outputStream().use { output ->
+                        input?.copyTo(output)
+                    }
+                }
+
+                scanViewModel.doPostBill(file, requireContext())
+                binding.progressBarCyclic.visibility = View.VISIBLE
+                Log.d("PhotoPicker", "Selected URI: ${uri.path}")
             } else {
                 Log.d("PhotoPicker", "No media selected")
             }
@@ -163,6 +174,46 @@ class ScanFragment : Fragment() {
         }
     }
 
+    fun creataDialog(billItems: Items?) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
+
+        val messageBuilder = StringBuilder()
+        val titleBuilder = StringBuilder()
+        val posBtnBuilder = StringBuilder()
+        val negBtnBuilder = StringBuilder()
+
+        if (billItems != null) {
+            titleBuilder.append("Scanned Transactions")
+            messageBuilder.append("Do you want to save this transactions?\n\n")
+            posBtnBuilder.append("Save Transaction")
+            negBtnBuilder.append("Cancel")
+            for ((index, item) in billItems.items.withIndex()) {
+                val itemNumber = index + 1
+                messageBuilder.append("Item $itemNumber\n")
+                messageBuilder.append("• Name: ${item.name}\n")
+                messageBuilder.append("• Price: ${item.price}\n")
+                messageBuilder.append("• Quantity: ${item.qty}\n\n")
+            }
+        } else {
+            titleBuilder.append("An Error Occurred")
+            messageBuilder.append("An error has occurred")
+            posBtnBuilder.append("Back")
+            negBtnBuilder.append("")
+        }
+
+        builder
+            .setMessage(messageBuilder.toString())
+            .setTitle(titleBuilder.toString())
+            .setPositiveButton(posBtnBuilder.toString()) { dialog, which ->
+                // Do something.
+            }
+            .setNegativeButton(negBtnBuilder.toString()) { dialog, which ->
+                // Do something else.
+            }
+
+        val dialog: AlertDialog = builder.create()
+        dialog.show()
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
