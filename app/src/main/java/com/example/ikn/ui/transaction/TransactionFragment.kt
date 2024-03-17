@@ -8,6 +8,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 /**
  * A simple [Fragment] subclass.
@@ -18,6 +26,8 @@ class TransactionFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+
+    private val transactionViewModel: TransactionViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +41,37 @@ class TransactionFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_transaction, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_transaction, container, false)
+
+        val transactionRecyclerView: RecyclerView = rootView.findViewById(R.id.rvTransaction)
+        val transactionAdapter = TransactionAdapter()
+        transactionRecyclerView.adapter = transactionAdapter
+
+        val layoutManager = LinearLayoutManager(requireContext())
+        transactionRecyclerView.layoutManager = layoutManager
+
+        // Dummy data
+        val dummyTransactions = listOf(
+            Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
+            Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
+            Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta"),
+                    Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
+            Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
+            Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta")
+        )
+
+        transactionAdapter.submitList(dummyTransactions)
+
+        // Update the UI
+//        lifecycleScope.launch {
+//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                transactionViewModel.transactionHistory.collect { transactionHistory ->
+//                    transactionAdapter.submitList(transactionHistory.history)
+//                }
+//            }
+//        }
+
+        return rootView
     }
 
     companion object {

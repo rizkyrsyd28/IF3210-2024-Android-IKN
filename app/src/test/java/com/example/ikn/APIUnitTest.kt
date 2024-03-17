@@ -9,7 +9,7 @@ import java.io.File
 class APIUnitTest {
     private var token : String = ""
 
-    @Before
+    @Test
     fun loginAPI() {
         runBlocking {
             val repo = Repository()
