@@ -12,8 +12,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.ikn.NewTransactionFragment
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -23,11 +26,8 @@ import kotlinx.coroutines.launch
  * create an instance of this fragment.
  */
 class TransactionFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    private val transactionViewModel: TransactionViewModel by viewModels()
+    private val transactionViewModel: TransactionViewModel by viewModels { TransactionViewModel.Factory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,21 +55,32 @@ class TransactionFragment : Fragment() {
             Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
             Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
             Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta"),
-                    Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
+            Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
+            Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
+            Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta"),
+            Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
+            Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
+            Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta"),
+            Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
             Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
             Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta")
         )
 
         transactionAdapter.submitList(dummyTransactions)
 
-        // Update the UI
-//        lifecycleScope.launch {
-//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-//                transactionViewModel.transactionHistory.collect { transactionHistory ->
-//                    transactionAdapter.submitList(transactionHistory.history)
-//                }
-//            }
-//        }
+        transactionViewModel.transactions.observe(viewLifecycleOwner) { transactionList ->
+            transactionAdapter.submitList(transactionList)
+        }
+
+        val newTransactionFloatingActionButton =
+            rootView.findViewById<FloatingActionButton>(R.id.fabAddTransaction)
+        newTransactionFloatingActionButton.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, NewTransactionFragment())
+                .setReorderingAllowed(true)
+                .addToBackStack("new_transaction")
+                .commit()
+        }
 
         return rootView
     }

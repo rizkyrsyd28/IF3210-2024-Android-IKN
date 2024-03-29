@@ -11,13 +11,20 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.example.ikn.data.AppDatabase
 import com.example.ikn.databinding.ActivityMainBinding
 import java.util.Locale
 import com.example.ikn.utils.SharedPreferencesManager
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var appDatabase: AppDatabase
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Initialize the database
+        appDatabase = AppDatabase.getInstance(this.applicationContext)
 
         supportActionBar?.hide()
 
