@@ -2,6 +2,7 @@ package com.example.ikn
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
@@ -13,6 +14,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.ikn.data.AppDatabase
 import com.example.ikn.databinding.ActivityMainBinding
 import java.util.Locale
+import com.example.ikn.utils.SharedPreferencesManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -43,6 +45,21 @@ class MainActivity : AppCompatActivity() {
                 }
                 ?.replaceFirstChar { it.uppercase() }
         }
+
+        val sharedPref = SharedPreferencesManager(this)
+        val token = sharedPref.getString("TOKEN")
+
+        Log.i("MAIN", "Data - $token")
+
+//        setupActionBarWithNavController(navController, AppBarConfiguration(
+//            setOf(
+//                R.id.nav_scan,
+//                R.id.nav_transaction,
+//                R.id.nav_graf,
+//                R.id.nav_setting
+//            )
+//        )
+//        )
 
     }
 }
