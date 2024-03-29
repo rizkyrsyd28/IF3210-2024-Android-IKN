@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("kotlin-kapt")
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
@@ -10,7 +10,7 @@ android {
 
     buildFeatures {
         viewBinding = true
-        dataBinding = true
+//        dataBinding = true
     }
 
     defaultConfig {
@@ -23,9 +23,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    dataBinding {
-        android.buildFeatures.dataBinding = true
-    }
+//    dataBinding {
+//        android.buildFeatures.dataBinding = true
+//    }
     viewBinding {
         android.buildFeatures.viewBinding = true
     }
@@ -40,15 +40,39 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 }
 
 dependencies {
+    val roomVersion = "2.5.2"
+
+    implementation("javax.inject:javax.inject:1")
+
+    implementation("androidx.room:room-runtime:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
+
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation("androidx.room:room-ktx:$roomVersion")
+
+    // optional - RxJava2 support for Room
+    implementation("androidx.room:room-rxjava2:$roomVersion")
+
+    // optional - RxJava3 support for Room
+    implementation("androidx.room:room-rxjava3:$roomVersion")
+
+    // optional - Guava support for Room, including Optional and ListenableFuture
+    implementation("androidx.room:room-guava:$roomVersion")
+
+    // optional - Test helpers
+    testImplementation("androidx.room:room-testing:$roomVersion")
+
+    // optional - Paging 3 Integration
+    implementation("androidx.room:room-paging:$roomVersion")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -72,13 +96,14 @@ dependencies {
     implementation("androidx.camera:camera-view:1.3.2")
     implementation("androidx.compose.ui:ui-viewbinding:1.6.3")
 
-    annotationProcessor("com.android.databinding:compiler:3.1.4")
+//    annotationProcessor("com.android.databinding:compiler:3.1.4")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
 }
 
 kapt {
-    generateStubs = true
+    correctErrorTypes=true
 }
