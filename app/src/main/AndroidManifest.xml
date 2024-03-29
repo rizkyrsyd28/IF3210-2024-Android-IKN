@@ -5,10 +5,11 @@
     <uses-feature
         android:name="android.hardware.camera.any"
         android:required="true" />
+
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -20,6 +21,11 @@
         android:supportsRtl="true"
         android:theme="@style/Base.Theme.IKN"
         tools:targetApi="31">
+        <service
+            android:name=".service.NetworkService"
+            android:enabled="true"
+            android:exported="true"></service>
+
         <activity
             android:name=".SplashActivity"
             android:exported="true">

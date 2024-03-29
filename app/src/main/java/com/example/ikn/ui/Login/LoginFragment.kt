@@ -45,6 +45,7 @@ class LoginFragment: Fragment() {
                    Handler(Looper.getMainLooper()).postDelayed(
                        {
                            startActivity(Intent(activity, MainActivity::class.java))
+                           activity?.finish()
                        }
                    , 3000)
             }
