@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import com.example.ikn.R
-import com.example.ikn.service.NetworkService
+import com.example.ikn.service.network.NetworkService
 
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,8 +16,8 @@ class LoginActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_login)
 
-//        val service = (Intent(this, NetworkService::class.java))
-//        startService(service)
+        val service = (Intent(this, NetworkService::class.java))
+        startService(service)
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
