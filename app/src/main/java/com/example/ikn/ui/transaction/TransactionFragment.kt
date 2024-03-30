@@ -9,23 +9,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.ikn.NewTransactionFragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
 /**
  * A simple [Fragment] subclass.
  * Use the [TransactionFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class TransactionFragment : Fragment() {
+class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionItemLongClickListener {
 
     private val transactionViewModel: TransactionViewModel by viewModels { TransactionViewModel.Factory }
 
@@ -44,29 +37,29 @@ class TransactionFragment : Fragment() {
         val rootView = inflater.inflate(R.layout.fragment_transaction, container, false)
 
         val transactionRecyclerView: RecyclerView = rootView.findViewById(R.id.rvTransaction)
-        val transactionAdapter = TransactionAdapter()
+        val transactionAdapter = TransactionAdapter(itemClickListener = null, itemLongClickListener = this)
         transactionRecyclerView.adapter = transactionAdapter
 
         val layoutManager = LinearLayoutManager(requireContext())
         transactionRecyclerView.layoutManager = layoutManager
 
-        // Dummy data
-        val dummyTransactions = listOf(
-            Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
-            Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
-            Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta"),
-            Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
-            Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
-            Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta"),
-            Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
-            Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
-            Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta"),
-            Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
-            Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
-            Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta")
-        )
-
-        transactionAdapter.submitList(dummyTransactions)
+//        // Dummy data
+//        val dummyTransactions = listOf(
+//            Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
+//            Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
+//            Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta"),
+//            Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
+//            Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
+//            Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta"),
+//            Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
+//            Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
+//            Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta"),
+//            Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
+//            Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
+//            Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta")
+//        )
+//
+//        transactionAdapter.submitList(dummyTransactions)
 
         transactionViewModel.transactions.observe(viewLifecycleOwner) { transactionList ->
             transactionAdapter.submitList(transactionList)
@@ -102,5 +95,15 @@ class TransactionFragment : Fragment() {
 
                 }
             }
+    }
+
+    override fun onItemLongClick(transactionId: Int) {
+        val clickedTransaction =
+
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, UpdateTransactionFragment())
+            .setReorderingAllowed(true)
+            .addToBackStack("update_transaction")
+            .commit()
     }
 }

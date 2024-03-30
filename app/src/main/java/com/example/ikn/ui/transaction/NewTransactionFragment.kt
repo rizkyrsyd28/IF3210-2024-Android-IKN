@@ -1,6 +1,5 @@
-package com.example.ikn
+package com.example.ikn.ui.transaction
 
-import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -8,25 +7,16 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.example.ikn.R
 import com.example.ikn.data.AppDatabase
 import com.example.ikn.data.TransactionCategory
 import com.example.ikn.data.TransactionRepository
-import com.example.ikn.ui.transaction.Transaction
-import com.example.ikn.ui.transaction.TransactionCategoryAdapter
-import com.example.ikn.ui.transaction.TransactionFragment
-import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
-
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
 /**
  * A simple [Fragment] subclass.
@@ -56,8 +46,12 @@ class NewTransactionFragment : Fragment() {
 
         val rootView = inflater.inflate(R.layout.fragment_new_transaction, container, false)
 
-        val textIdleColor = ContextCompat.getColor(requireContext(), R.color.md_theme_light_onTertiaryContainer)
-        val textFocusColor = ContextCompat.getColor(requireContext(), R.color.md_theme_light_onPrimary)
+        val textIdleColor = ContextCompat.getColor(requireContext(),
+            R.color.md_theme_light_onTertiaryContainer
+        )
+        val textFocusColor = ContextCompat.getColor(requireContext(),
+            R.color.md_theme_light_onPrimary
+        )
 
         val categories = TransactionCategory.entries.toTypedArray()
         val autoCompleteTextView =
@@ -190,8 +184,6 @@ class NewTransactionFragment : Fragment() {
         fun newInstance(param1: String, param2: String) =
             NewTransactionFragment().apply {
                 arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
                 }
             }
     }

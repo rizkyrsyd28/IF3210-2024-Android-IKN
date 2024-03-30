@@ -19,6 +19,7 @@ class TransactionRepository(
         .map { transactions ->
             transactions.map { transaction ->
                 Transaction(
+                    id = transaction.id,
                     date = dateFormat.format(transaction.date.time),
                     category = transaction.category.toString(),
                     name = transaction.name,
