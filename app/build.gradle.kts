@@ -49,7 +49,7 @@ android {
 }
 
 dependencies {
-    val roomVersion = "2.5.2"
+    val roomVersion = "2.6.1"
 
     implementation("javax.inject:javax.inject:1")
 

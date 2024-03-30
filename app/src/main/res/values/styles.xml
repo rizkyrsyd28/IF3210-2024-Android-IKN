@@ -19,4 +19,8 @@
         <item name="cornerSize">30dp</item>
     </style>
 
+    <style name="CustomAutoCompleteTextViewStyle" parent="Widget.AppCompat.AutoCompleteTextView">
+        <item name="android:popupBackground">?colorTertiaryContainer</item>
+    </style>
+
 </resources>

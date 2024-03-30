@@ -8,6 +8,7 @@ import java.text.NumberFormat
 import java.util.Locale
 
 class TransactionViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    private var transactionId: Long = -1;
     private val nameTextView: TextView
     private val dateTextView: TextView
     private val categoryTextView: TextView

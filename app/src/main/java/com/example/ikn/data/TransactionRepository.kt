@@ -28,6 +28,20 @@ class TransactionRepository(
             }
         }
 
+    suspend fun insertTransaction(transaction: Transaction) {
+
+        val newTransaction = Transaction(
+            name = transaction.name,
+            amount = transaction.amount,
+            location = transaction.location,
+            category = TransactionCategory.valueOf(transaction.category),
+        )
+        transactionDao.insertTransaction(
+            newTransaction
+        )
+
+    }
+
     companion object {
 
         @Volatile

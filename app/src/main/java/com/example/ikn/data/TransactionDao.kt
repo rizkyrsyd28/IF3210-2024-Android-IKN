@@ -14,7 +14,7 @@ interface TransactionDao {
     fun getAllTransactions(): Flow<List<Transaction>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertTransaction(vararg transaction: Transaction)
+    suspend fun insertTransaction(transaction: Transaction)
 
     @Insert
     fun insertAllTransactions(transactions: List<Transaction>)

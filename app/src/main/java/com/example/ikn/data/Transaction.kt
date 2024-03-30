@@ -6,7 +6,7 @@ import java.util.Calendar
 
 @Entity(tableName = "transactions")
 data class Transaction(
-    @PrimaryKey val id: Int,
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
 
     val name: String,
     val category: TransactionCategory,
