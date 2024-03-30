@@ -49,7 +49,7 @@ android {
 }
 
 dependencies {
-    val roomVersion = "2.5.2"
+    val roomVersion = "2.6.1"
 
     implementation("javax.inject:javax.inject:1")
 
@@ -73,6 +73,9 @@ dependencies {
 
     // optional - Paging 3 Integration
     implementation("androidx.room:room-paging:$roomVersion")
+
+    // graph library
+    implementation("ir.mahozad.android:pie-chart:0.7.0")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")

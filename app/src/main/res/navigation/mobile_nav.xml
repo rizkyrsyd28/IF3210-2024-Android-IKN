@@ -16,10 +16,10 @@
         android:label="fragment_scan"
         tools:layout="@layout/fragment_scan" />
     <fragment
-        android:id="@+id/nav_graf"
-        android:name="com.example.ikn.ui.Graf.GrafFragment"
-        android:label="fragment_graf"
-        tools:layout="@layout/fragment_graf" />
+        android:id="@+id/nav_graph"
+        android:name="com.example.ikn.ui.Graph.GraphFragment"
+        android:label="fragment_graph"
+        tools:layout="@layout/fragment_graph" />
     <fragment
         android:id="@+id/nav_settings"
         android:name="com.example.ikn.ui.Settings.SettingsFragment"

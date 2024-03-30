@@ -15,4 +15,5 @@
     <string name="bottom_navigation_item_icon">Bottom navigation item icon</string>
     <string name="total_transaction">Total Transaction</string>
     <string name="desc_floating_action_button_transaction">Button to add a new transaction</string>
+    <string name="save_string">Save</string>
 </resources>
