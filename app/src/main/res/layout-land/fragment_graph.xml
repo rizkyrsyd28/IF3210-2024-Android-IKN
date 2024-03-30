@@ -31,7 +31,7 @@
 
         <TextView
             android:id="@+id/textViewIncomePrcntg"
-            android:layout_width="120dp"
+            android:layout_width="100dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@drawable/bg_rounded_yellow"
@@ -41,16 +41,35 @@
             android:textSize="34sp"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/textViewIncome"
-            android:layout_width="180dp"
+        <LinearLayout
+            android:layout_width="200dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="center_horizontal|center_vertical"
-            android:text="Income"
-            android:textColor="@color/broken_white"
-            android:textSize="30sp"
-            android:textStyle="bold" />
+            android:orientation="vertical"
+            android:paddingHorizontal="10sp"
+            android:paddingVertical="2sp">
+
+            <TextView
+                android:id="@+id/textViewIncome"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Income"
+                android:textColor="@color/md_theme_light_onSecondary"
+                android:textSize="24dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewIncomeAmount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="16dp"
+                android:textColor="@color/md_theme_light_onSecondary"
+                android:textStyle="bold"
+                android:text="Rp 20.000.000" />
+        </LinearLayout>
+
     </LinearLayout>
 
     <LinearLayout
@@ -67,7 +86,7 @@
 
         <TextView
             android:id="@+id/textViewExpensePrcntg"
-            android:layout_width="120dp"
+            android:layout_width="100dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@drawable/bg_rounded_blue"
@@ -77,16 +96,35 @@
             android:textSize="34sp"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/textViewExpense"
-            android:layout_width="180dp"
+        <LinearLayout
+            android:layout_width="200dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="center_horizontal|center_vertical"
-            android:text="Expense"
-            android:textColor="@color/broken_white"
-            android:textSize="30sp"
-            android:textStyle="bold" />
+            android:orientation="vertical"
+            android:paddingHorizontal="10sp"
+            android:paddingVertical="2sp">
+
+            <TextView
+                android:id="@+id/textViewExpense"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Expense"
+                android:textColor="@color/md_theme_light_onSecondary"
+                android:textSize="24dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewExpenseAmount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/md_theme_light_onSecondary"
+                android:textSize="16dp"
+                android:textStyle="bold"
+                android:text="Rp 20.000.000" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
