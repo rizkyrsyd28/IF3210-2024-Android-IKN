@@ -1,5 +1,6 @@
 package com.example.ikn.ui.transaction
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
@@ -9,11 +10,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AutoCompleteTextView
+import android.widget.Button
 import android.widget.EditText
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.lifecycleScope
 import com.example.ikn.R
+import com.example.ikn.data.AppDatabase
+import com.example.ikn.data.TransactionRepository
+import kotlinx.coroutines.launch
+import java.text.ParseException
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 private const val ARG_TRANSACTION_ID = "transaction_id"
 private const val ARG_TRANSACTION_NAME = "transaction_name"
@@ -35,6 +44,12 @@ class UpdateTransactionFragment : Fragment() {
     private var transactionLocation: String? = null
     private var transactionCategory: String? = null
 
+    private val transactionRepository: TransactionRepository by lazy {
+        TransactionRepository.getInstance(
+            AppDatabase.getInstance(requireContext()).transactionDao()
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -47,6 +62,7 @@ class UpdateTransactionFragment : Fragment() {
         }
     }
 
+    @SuppressLint("SimpleDateFormat")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -61,21 +77,55 @@ class UpdateTransactionFragment : Fragment() {
             R.color.md_theme_light_onPrimary
         )
 
+        val nameEditText = rootView.findViewById<EditText>(R.id.etNameNewTransaction)
+        nameEditText.setText(transactionName)
+
+        val amountEditText = rootView.findViewById<EditText>(R.id.etAmountNewTransaction)
+        amountEditText.setText(transactionAmount.toString())
+
         // Set location and category to be un-clickable
         val autoCompleteTextView = rootView.findViewById<AutoCompleteTextView>(R.id.autoCategoryNewTransaction)
         autoCompleteTextView.isEnabled = false
         autoCompleteTextView.isClickable = false
         autoCompleteTextView.isFocusable = false
+        autoCompleteTextView.setText(transactionCategory)
 
         val locationEditText = rootView.findViewById<EditText>(R.id.etLocationNewTransaction)
         locationEditText.isEnabled = false
         locationEditText.isClickable = false
         locationEditText.isFocusable = false
+        locationEditText.setText(transactionLocation)
 
+        val recyclerViewFormat = SimpleDateFormat("dd MMM yyy", Locale.US)
+        val formFormat = SimpleDateFormat("dd/MM/yyyy")
+        val dateString = recyclerViewFormat.parse(transactionDate!!)?.let { formFormat.format(it) }
         val dateMaxLength = 10
         val date = rootView.findViewById<EditText>(R.id.etDateNewTransaction)
         val dateFilters = arrayOf<InputFilter>(InputFilter.LengthFilter(dateMaxLength))
+        date.setText(dateString)
         date.filters = dateFilters
+
+        val saveButton = rootView.findViewById<Button>(R.id.btnSaveNewTransaction)
+        saveButton.isEnabled = isValidDate(dateString)
+        saveButton.setOnClickListener {
+            val nameInput = nameEditText.text.toString()
+            val amountInput = amountEditText.text.toString().toInt()
+            val dateInput = date.text.toString()
+
+            val updatedTransaction = Transaction(
+                id = transactionId!!,
+                name = nameInput,
+                amount = amountInput,
+                date = dateInput,
+                location = transactionLocation!!,
+                category = transactionCategory!!
+            )
+
+            lifecycleScope.launch {
+                transactionRepository.updateTransaction(updatedTransaction)
+                parentFragmentManager.popBackStack()
+            }
+        }
 
         date.addTextChangedListener(object : TextWatcher {
 
@@ -118,11 +168,28 @@ class UpdateTransactionFragment : Fragment() {
 
                 currentLength = length
 
+                saveButton.isEnabled = isValidDate(s.toString())
+
             }
 
         })
 
         return rootView
+    }
+
+    private fun isValidDate(dateString: String?): Boolean {
+        if (dateString.isNullOrEmpty()) return false
+
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
+        dateFormat.isLenient = false
+
+        return try {
+
+            dateFormat.parse(dateString)
+            true
+        } catch (e: ParseException) {
+            false
+        }
     }
 
     companion object {

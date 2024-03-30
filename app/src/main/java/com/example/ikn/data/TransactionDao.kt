@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TransactionDao {
-    @Query("SELECT * FROM transactions ORDER BY date")
+    @Query("SELECT * FROM transactions ORDER BY date DESC")
     fun getAllTransactions(): Flow<List<Transaction>>
 
     @Query("SELECT * FROM transactions WHERE id = :transactionId")
@@ -23,8 +23,8 @@ interface TransactionDao {
     fun insertAllTransactions(transactions: List<Transaction>)
 
     @Update
-    fun updateTransaction(vararg transaction: Transaction)
+    suspend fun updateTransaction(transaction: Transaction)
 
-    @Delete
-    fun deleteTransaction(vararg transaction: Transaction)
+    @Query("DELETE FROM transactions WHERE id = :transactionId")
+    suspend fun deleteTransaction(transactionId: Int)
 }

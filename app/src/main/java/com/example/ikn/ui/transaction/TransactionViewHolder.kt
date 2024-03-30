@@ -1,7 +1,9 @@
 package com.example.ikn.ui.transaction
 
+import android.util.Log
 import android.view.View
 import android.widget.TextView
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ikn.MainActivity
 import com.example.ikn.R
@@ -10,7 +12,8 @@ import java.util.Locale
 
 class TransactionViewHolder(
     view: View,
-    private val itemLongClickListener: TransactionAdapter.OnTransactionItemLongClickListener?
+    private val itemClickListener: TransactionAdapter.OnTransactionItemClickListener?,
+    private val itemLongClickListener: TransactionAdapter.OnTransactionItemLongClickListener?,
 ) : RecyclerView.ViewHolder(view) {
     private var transactionId: Int = -1;
     private val nameTextView: TextView
@@ -29,12 +32,22 @@ class TransactionViewHolder(
         itemView.setOnLongClickListener {
             val position = adapterPosition
             if (position != RecyclerView.NO_POSITION) {
-                itemLongClickListener?.onItemLongClick(position)
+                itemLongClickListener?.onItemLongClick(transactionId)
                 true
             } else {
                 false
             }
         }
+
+        itemView.setOnClickListener {
+            val position = adapterPosition
+            if (position != RecyclerView.NO_POSITION) {
+                val locationString = locationTextView.text.toString()
+                itemClickListener?.onItemClick(locationString)
+                Log.d("MAP Intent", "location string: $locationTextView.text.toString()")
+            }
+        }
+
     }
 
     fun bind(transaction: Transaction) {

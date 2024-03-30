@@ -8,16 +8,21 @@ import com.example.ikn.R
 
 class TransactionAdapter(
     private val itemClickListener: OnTransactionItemClickListener?,
-    private val itemLongClickListener: OnTransactionItemLongClickListener?
+    private val itemLongClickListener: OnTransactionItemLongClickListener?,
+    private val itemDeleteListener: OnDeleteListener?
 ) :
     ListAdapter<Transaction, TransactionViewHolder>(TransactionDiffCallback) {
 
     interface OnTransactionItemClickListener {
-        fun onItemClick(transactionId: Int)
+        fun onItemClick(transactionLocation: String)
     }
 
     interface OnTransactionItemLongClickListener {
         fun onItemLongClick(transactionId: Int)
+    }
+
+    interface OnDeleteListener {
+        fun onDeleteItem(transactionId: Int)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
@@ -25,9 +30,8 @@ class TransactionAdapter(
             .from(parent.context)
             .inflate(R.layout.item_transaction, parent, false)
 
-        return TransactionViewHolder(view, itemLongClickListener)
+        return TransactionViewHolder(view, itemClickListener, itemLongClickListener)
     }
-
 
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val transaction = getItem(position)

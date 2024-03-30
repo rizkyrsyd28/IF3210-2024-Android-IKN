@@ -1,5 +1,7 @@
 package com.example.ikn.ui.transaction
 
+import android.content.Intent
+import android.net.Uri
 import com.example.ikn.R
 
 
@@ -9,16 +11,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.ikn.data.AppDatabase
+import com.example.ikn.data.TransactionRepository
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.launch
 
 /**
  * A simple [Fragment] subclass.
  * Use the [TransactionFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionItemLongClickListener {
+class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionItemLongClickListener,
+    TransactionAdapter.OnDeleteListener, TransactionAdapter.OnTransactionItemClickListener {
 
     private val transactionViewModel: TransactionViewModel by viewModels { TransactionViewModel.Factory }
 
@@ -31,13 +39,40 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionItemLong
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         // Inflate the layout for this fragment
         val rootView = inflater.inflate(R.layout.fragment_transaction, container, false)
 
         val transactionRecyclerView: RecyclerView = rootView.findViewById(R.id.rvTransaction)
-        val transactionAdapter = TransactionAdapter(itemClickListener = null, itemLongClickListener = this)
+        val transactionAdapter =
+            TransactionAdapter(
+                itemClickListener = this,
+                itemLongClickListener = this,
+                itemDeleteListener = this
+            )
+
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            0,
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder,
+            ): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                val transaction = transactionAdapter.currentList[position]
+                onDeleteItem(transaction.id)
+            }
+        })
+
+        itemTouchHelper.attachToRecyclerView(transactionRecyclerView)
+
         transactionRecyclerView.adapter = transactionAdapter
 
         val layoutManager = LinearLayoutManager(requireContext())
@@ -98,12 +133,42 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionItemLong
     }
 
     override fun onItemLongClick(transactionId: Int) {
-        val clickedTransaction =
+        lifecycleScope.launch {
+            val clickedTransaction = TransactionRepository.getInstance(
+                AppDatabase.getInstance(requireContext()).transactionDao()
+            ).getTransactionById(transactionId)
 
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, UpdateTransactionFragment())
-            .setReorderingAllowed(true)
-            .addToBackStack("update_transaction")
-            .commit()
+            if (clickedTransaction != null) {
+                val fragmentInstance = UpdateTransactionFragment.newInstance(
+                    clickedTransaction.id,
+                    clickedTransaction.name,
+                    clickedTransaction.date,
+                    clickedTransaction.amount,
+                    clickedTransaction.location,
+                    clickedTransaction.category
+                )
+
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, fragmentInstance)
+                    .setReorderingAllowed(true)
+                    .addToBackStack("update_transaction")
+                    .commit()
+            }
+        }
+    }
+
+    override fun onDeleteItem(transactionId: Int) {
+        lifecycleScope.launch {
+            TransactionRepository.getInstance(
+                AppDatabase.getInstance(requireContext()).transactionDao()
+            ).deleteTransaction(transactionId)
+        }
+    }
+
+    override fun onItemClick(transactionLocation: String) {
+        val gmmIntentURI = Uri.parse("geo:0,0?q=" + Uri.encode(transactionLocation))
+        val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentURI)
+        mapIntent.setPackage("com.google.android.apps.maps")
+        startActivity(mapIntent)
     }
 }
