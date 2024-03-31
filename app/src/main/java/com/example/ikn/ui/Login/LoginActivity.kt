@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.util.Log
 import com.example.ikn.R
 import com.example.ikn.service.network.NetworkService
-
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
