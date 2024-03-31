@@ -13,4 +13,5 @@ data class Transaction(
     val amount: Int,
     val location: String,
     val date: Calendar = Calendar.getInstance()
+    // TODO: Add user email
 )
