@@ -28,3 +28,5 @@ interface TransactionDao {
     @Query("DELETE FROM transactions WHERE id = :transactionId")
     suspend fun deleteTransaction(transactionId: Int)
 }
+
+// TODO: Add user email to insert and get all

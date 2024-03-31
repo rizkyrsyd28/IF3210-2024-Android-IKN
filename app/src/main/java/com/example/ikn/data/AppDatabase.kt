@@ -86,3 +86,5 @@ val MIGRATION_1_2: Migration = object : Migration(1, 2) {
         db.execSQL("ALTER TABLE transactions_temp RENAME TO transactions;")
     }
 }
+
+// TODO: Create migration 2 -> 3 (adding user email to data.transaction)

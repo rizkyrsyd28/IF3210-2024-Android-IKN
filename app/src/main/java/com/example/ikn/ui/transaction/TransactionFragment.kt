@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ikn.data.AppDatabase
 import com.example.ikn.data.TransactionRepository
+import com.example.ikn.utils.SharedPreferencesManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
@@ -124,6 +125,13 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionItemLong
                 .addToBackStack("new_transaction")
                 .commit()
         }
+
+        val spm = SharedPreferencesManager(requireContext())
+        val token = spm.getString("TOKEN")
+        val email = spm.getString("EMAIL")
+
+        Log.d("Transaction User Data", "User Token: $token")
+        Log.d("Transaction User Data", "User Email: $email")
 
         return rootView
     }
