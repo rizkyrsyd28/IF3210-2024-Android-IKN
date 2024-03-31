@@ -15,8 +15,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import retrofit2.Response
 import java.io.IOException
+import java.time.Instant
 import java.util.concurrent.TimeUnit
 
 class TokenService : Service() {
@@ -25,36 +27,52 @@ class TokenService : Service() {
     private lateinit var job: Job
     /* State */
     private var isKeepLoggedIn: Boolean = false
+    private var period = TimeUnit.MINUTES.toMillis(5)
 
     override fun onCreate() {
         super.onCreate()
         prefRepo = PreferenceRepository(SharedPreferencesManager(applicationContext))
+        prefRepo.setKeepLoggedIn(false)
         isKeepLoggedIn = prefRepo.isKeepLoggedIn()
+
+        if (isKeepLoggedIn) {
+            runBlocking {
+                val signInInfo = prefRepo.getSignInInfo()
+                val res: Response<LoginResponse> = repo.postLogin(signInInfo.first, signInInfo.second)
+                if (res.isSuccessful) prefRepo.saveToken(res.body()?.token!!)
+                Log.w(TAG, "Hasil - ${res.isSuccessful}")
+            }
+        }
 
         setupTokenJobSchedule()
 
-        Log.d(TAG, "Token Service created - $isKeepLoggedIn")
+        Log.d(TAG, "Token Service created - $period")
     }
     private fun setupTokenJobSchedule() {
         job = CoroutineScope(Dispatchers.IO).launch {
             while (isActive) {
                 isKeepLoggedIn = prefRepo.isKeepLoggedIn()
+                Log.i(TAG, "Period Data")
+
+                delay(period)
 
                 if (isTokenExpired()) {
+                    Log.i(TAG, "Expired Token")
                     if (isKeepLoggedIn) {
+                        Log.i(TAG, "Keep Login Token")
                         restartToken()
                     } else {
+                        Log.i(TAG, "Not Keep Login Token")
                         forceLogOut()
                     }
                 }
-                delay(period)
             }
         }
     }
     override fun onDestroy() {
         super.onDestroy()
         job.cancel()
-        Log.d(TAG, "Token Service created")
+        Log.d(TAG, "Token Service destroyed")
 
     }
     override fun onBind(intent: Intent?): IBinder? {
@@ -70,12 +88,20 @@ class TokenService : Service() {
             prefRepo.saveToken(res.body()!!.token)
             Log.i(TAG, "Refresh Token Success")
 
+            val resToken: Response<TokenResponse> = repo.postToken(prefRepo.getToken())
+
+            if (!res.isSuccessful || res.body() == null) throw Exception("Failed Get Token")
+            val exp = resToken.body()!!.exp
+            val now = Instant.now().epochSecond
+
+            period = (exp - now) * 1000
         } catch (exp: Exception) {
             forceLogOut()
             Log.e(TAG, "Exception: ${exp.message} ")
         }
     }
     private fun forceLogOut() {
+        Log.i(TAG, "Try To Force LogOut")
         prefRepo.clearToken()
         prefRepo.setSignInInfo("","")
         prefRepo.setKeepLoggedIn(false)
@@ -85,19 +111,17 @@ class TokenService : Service() {
 
         val res: Response<TokenResponse> = repo.postToken(prefRepo.getToken())
 
-        if (!res.isSuccessful) {
-            Log.e(TAG, "Unsuccessful")
-            return false
-        }
+        Log.e(TAG, "Result - issuc ${res.isSuccessful} - code ${res.code()}")
 
-        if (res.body() == null) {
+        if (!res.isSuccessful || res.body() == null) {
             Log.e(TAG, "Cant Get Token")
-            return false
+            return true
         }
         val exp = res.body()!!.exp
-        val iat = res.body()!!.iat
+        val now = Instant.now().epochSecond
 
-        return exp - iat < 45
+        Log.e(TAG, "Difference ${exp - now}")
+        return exp - now < 60
     }
     private fun signOutBroadcast() {
         val intent = Intent("TOKEN_LOGOUT").apply {}
@@ -105,6 +129,5 @@ class TokenService : Service() {
     }
     companion object {
         const val TAG = "[TOKEN SERVICE]"
-        var period = TimeUnit.MINUTES.toMillis(4) + TimeUnit.SECONDS.toMillis(20)
     }
 }

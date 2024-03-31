@@ -16,31 +16,46 @@ import com.example.ikn.utils.SharedPreferencesManager
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import retrofit2.Response
+import java.net.SocketTimeoutException
+import java.util.concurrent.TimeoutException
 
 class LoginViewModel(private val repo: Repository, private val prefRepo: PreferenceRepository) : ViewModel() {
 
     private val _authorized : MutableLiveData<Boolean> = MutableLiveData<Boolean>(false)
     val authorized : LiveData<Boolean> = _authorized
 
+    private val _failed : MutableLiveData<Boolean> = MutableLiveData<Boolean>(false)
+    val failed : LiveData<Boolean> = _failed
+    var failedMessage = ""
+
     fun signInHandler(email: String, password: String, isKeepLoggedIn: Boolean) = viewModelScope.launch {
-        val res: Response<LoginResponse> = repo.postLogin(email, password)
+        try {
+            val res: Response<LoginResponse> = repo.postLogin(email, password)
 
-        if (!res.isSuccessful && res.body() == null) {
-            _authorized.value = false
-            throw Exception("LogIn Failed")
+            if (!res.isSuccessful && res.body() == null) {
+                _authorized.value = false
+                _failed.value = true
+                failedMessage = "Failed To SignIn, Check Your Email or Password"
+                return@launch
+            }
+
+            _authorized.value = true
+            prefRepo.saveToken(res.body()!!.token)
+            prefRepo.setKeepLoggedIn(isKeepLoggedIn)
+
+            if (isKeepLoggedIn) prefRepo.setSignInInfo(email, password)
+        } catch (exp: SocketTimeoutException) {
+            _failed.value = true
+            failedMessage = "Bad Connection"
+            Log.e("[VIEW MODEL LOGIN]", "Error - ${exp.message}")
         }
-
-        _authorized.value = true
-        prefRepo.saveToken(res.body()!!.token)
-        prefRepo.setKeepLoggedIn(isKeepLoggedIn)
-
-        if (isKeepLoggedIn) prefRepo.setSignInInfo(email, password)
     }
     fun isAllowKeepLoggedIn(): Boolean {
         val isKeepLoggedIn = prefRepo.isKeepLoggedIn()
         val signInInfo = prefRepo.getSignInInfo()
 
-        if (!isKeepLoggedIn && (signInInfo.first == "" && signInInfo.second == "")) return false
+        if (!isKeepLoggedIn) return false
+        if (signInInfo.first == "" && signInInfo.second == "") return false
 
         var result = false
         runBlocking {

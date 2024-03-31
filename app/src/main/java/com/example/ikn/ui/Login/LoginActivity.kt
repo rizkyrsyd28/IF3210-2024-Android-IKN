@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.util.Log
 import com.example.ikn.R
 import com.example.ikn.service.network.NetworkService
+import com.example.ikn.service.token.TokenService
+
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -15,8 +17,8 @@ class LoginActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_login)
 
-        val service = (Intent(this, NetworkService::class.java))
-        startService(service)
+//        val service = (Intent(this, NetworkService::class.java))
+//        startService(service)
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
@@ -30,8 +32,21 @@ class LoginActivity : AppCompatActivity() {
         Log.i("[LOGIN]", "Start LoginActivity")
     }
 
+    override fun onResume() {
+        super.onResume()
+        val service = (Intent(this, NetworkService::class.java))
+        val tokenService = (Intent(this, TokenService::class.java))
+        startService(service)
+        startService(tokenService)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        stopService(Intent(this, TokenService::class.java))
+        stopService(Intent(this, NetworkService::class.java))
+    }
     override fun onDestroy() {
         super.onDestroy()
-        Log.i("[LOGIN]", "Destroy LoginActivity")
+        Log.i("[LOGIN]", "Destroy LoginActivity config change $isChangingConfigurations, , finsih - $isFinishing")
     }
 }

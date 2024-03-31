@@ -74,6 +74,12 @@ class LoginFragment: Fragment() {
             }
         })
 
+        viewModel.failed.observe(viewLifecycleOwner, Observer { error ->
+            if (error) {
+                showToast(viewModel.failedMessage)
+            }
+        })
+
         return binding.root
     }
     @SuppressLint("UnspecifiedRegisterReceiverFlag")

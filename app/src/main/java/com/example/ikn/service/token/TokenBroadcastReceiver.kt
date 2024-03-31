@@ -6,9 +6,10 @@ import android.content.Intent
 import android.util.Log
 
 class TokenBroadcastReceiver(
-    private val forceLogOutHandler : () -> Unit
+    private val forceLogOutHandler :  () -> Unit
 ) : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        Log.i(TAG, "intent = ${intent.action}")
         if (intent.action != ACTION) return
         forceLogOutHandler()
     }

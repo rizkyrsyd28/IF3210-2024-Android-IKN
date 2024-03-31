@@ -28,7 +28,7 @@ class PreferenceRepository (private val prefManager: SharedPreferencesManager) {
         val email = prefManager.get(emailKey)
         val password = prefManager.get(passwordKey)
 
-        if (email == null || password == null) throw IOException("Can't Found SignIn Info")
+        if (email == null || password == null) return Pair("", "")
 
         return Pair(email, password)
     }
