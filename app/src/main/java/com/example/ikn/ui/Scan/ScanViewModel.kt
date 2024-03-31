@@ -56,8 +56,9 @@ class ScanViewModel(): ViewModel() {
             if (!token.isNullOrBlank()) {
                 val response = repository.postBill(file, token)
                 fetchedBill = response.body()
+                println(response.body())
             }
-            bill.value = fetchedBill
+            bill.value = fetchedBill!!;
         } catch (e: Exception) {
             e.printStackTrace()
         }

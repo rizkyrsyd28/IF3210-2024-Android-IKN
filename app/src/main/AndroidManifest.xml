@@ -5,10 +5,11 @@
     <uses-feature
         android:name="android.hardware.camera.any"
         android:required="true" />
-
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
     <application
@@ -24,7 +25,7 @@
         <receiver
             android:name=".service.network.NetworkBroadcastReceiver"
             android:enabled="true"
-            android:exported="true"></receiver>
+            android:exported="true"/>
         <receiver
             android:name=".service.token.TokenBroadcastReceiver"
             android:enabled="true"
@@ -66,6 +67,24 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+<!--        <activity-->
+<!--            android:name=".ui.Login.LoginActivity"-->
+<!--            android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+<!--        </activity>-->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.ikn.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths"/>
+        </provider>
     </application>
 
 </manifest>

@@ -74,8 +74,12 @@ dependencies {
     // optional - Paging 3 Integration
     implementation("androidx.room:room-paging:$roomVersion")
 
-    // graph library
+    // graph ui library
     implementation("ir.mahozad.android:pie-chart:0.7.0")
+
+    // xls and xlsx library
+    implementation("org.apache.poi:poi:5.2.0")
+    implementation("org.apache.poi:poi-ooxml:5.2.0")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -104,6 +108,8 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+    implementation("com.google.android.gms:play-services-location:21.2.0")
 
 }
 

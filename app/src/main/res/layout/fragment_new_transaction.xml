@@ -20,7 +20,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:text="Name"
-        android:textSize="15sp" />
+        android:textSize="17sp" />
     <EditText
         android:id="@+id/etNameNewTransaction"
         android:hint="(e.g. Groceries)"
@@ -47,7 +47,7 @@
         app:layout_constraintTop_toBottomOf="@id/etNameNewTransaction"
         app:layout_constraintStart_toStartOf="parent"
         android:text="Amount"
-        android:textSize="15sp" />
+        android:textSize="17sp" />
     <EditText
         android:id="@+id/etAmountNewTransaction"
         android:hint="(e.g. 12000)"
@@ -74,7 +74,7 @@
         app:layout_constraintTop_toBottomOf="@id/etAmountNewTransaction"
         app:layout_constraintStart_toStartOf="parent"
         android:text="Category"
-        android:textSize="15sp" />
+        android:textSize="17sp" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilCategoryNewTransaction"
@@ -92,7 +92,6 @@
             android:fontFamily="@font/urbanist_medium"
             android:background="@drawable/bg_rounded_transaction"
             app:hintTextColor="@drawable/selector_hint"
-            android:hint="Category"
             android:inputType="none"
             android:labelFor="@id/autoCategoryNewTransaction"
             android:padding="13dp"
@@ -111,7 +110,7 @@
         app:layout_constraintTop_toBottomOf="@id/tilCategoryNewTransaction"
         app:layout_constraintStart_toStartOf="parent"
         android:text="Location"
-        android:textSize="15sp" />
+        android:textSize="17sp" />
     <EditText
         android:id="@+id/etLocationNewTransaction"
         android:hint="(e.g. Supermarket)"
@@ -128,6 +127,19 @@
         android:textSize="15sp" />
 
     <Button
+        android:id="@+id/btnGetLocationNewTransaction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Get Location"
+        android:textSize="12sp"
+        android:fontFamily="@font/urbanist_semibold"
+        app:layout_constraintStart_toStartOf="parent"
+        android:backgroundTint="?colorSecondaryContainer"
+        android:textColor="?colorOnSecondary"
+        app:layout_constraintTop_toBottomOf="@id/etLocationNewTransaction" />
+
+    <Button
         android:id="@+id/btnSaveNewTransaction"
         android:layout_width="wrap_content"
         android:layout_height="55dp"
@@ -137,7 +149,7 @@
         android:fontFamily="@font/urbanist_semibold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etLocationNewTransaction" />
+        app:layout_constraintTop_toBottomOf="@id/btnGetLocationNewTransaction" />
 
 
 
