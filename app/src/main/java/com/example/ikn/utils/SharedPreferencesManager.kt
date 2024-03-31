@@ -4,7 +4,10 @@ import android.content.Context
 import android.content.SharedPreferences
 
 class SharedPreferencesManager (context: Context) {
-    private val NAME_PREF = "BM_PREF"
+    companion object {
+        const val NAME_PREF = "IKN_PREF"
+    }
+
     private val sharedPreferences : SharedPreferences
     private val editor : SharedPreferences.Editor
 
@@ -13,11 +16,11 @@ class SharedPreferencesManager (context: Context) {
         editor = sharedPreferences.edit()
     }
 
-    fun getString(key: String) : String? {
+    fun get(key: String) : String? {
         return sharedPreferences.getString(key, null)
     }
 
-    fun setString(key:String, value: String?) {
+    fun set(key:String, value: String?) {
         editor.putString(key, value).apply()
     }
 }

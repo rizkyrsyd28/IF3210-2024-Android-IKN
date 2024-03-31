@@ -47,19 +47,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         val sharedPref = SharedPreferencesManager(this)
-        val token = sharedPref.getString("TOKEN")
+        val token = sharedPref.get("TOKEN")
 
         Log.i("MAIN", "Data - $token")
-
-//        setupActionBarWithNavController(navController, AppBarConfiguration(
-//            setOf(
-//                R.id.nav_scan,
-//                R.id.nav_transaction,
-//                R.id.nav_graf,
-//                R.id.nav_setting
-//            )
-//        )
-//        )
 
     }
 }

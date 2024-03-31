@@ -50,7 +50,7 @@ class ScanViewModel(): ViewModel() {
     fun doPostBill(file: File, context: Context) = viewModelScope.launch {
         try {
             val sharedPref = SharedPreferencesManager(context)
-            val token = sharedPref.getString("TOKEN")
+            val token = sharedPref.get("TOKEN")
 
             var fetchedBill : BillResponse? = null
             if (!token.isNullOrBlank()) {
