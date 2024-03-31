@@ -9,9 +9,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.ikn.data.AppDatabase
 import com.example.ikn.data.TransactionCategory
 import com.example.ikn.data.TransactionRepository
-import com.example.ikn.model.response.BillResponse
 import com.example.ikn.ui.transaction.Transaction
-import kotlin.math.exp
 
 class GraphViewModel(transactionRepository: TransactionRepository) : ViewModel() {
     val transactions: LiveData<List<Transaction>> = transactionRepository.transactions.asLiveData();

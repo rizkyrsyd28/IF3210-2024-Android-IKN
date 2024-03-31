@@ -3,8 +3,12 @@ package com.example.ikn.ui.Scan
 import android.Manifest
 import android.app.AlertDialog
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -20,6 +24,7 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -28,10 +33,14 @@ import com.example.ikn.model.response.item.Items
 
 
 class ScanFragment : Fragment() {
-    private lateinit var cameraProvider: ProcessCameraProvider
+    private var cameraProvider: ProcessCameraProvider? = null
     private lateinit var imageCapture: ImageCapture
     private lateinit var pickMedia: ActivityResultLauncher<PickVisualMediaRequest>;
     private lateinit var scanViewModel: ScanViewModel
+
+    private val PERMISSION_CAMERA_CODE = 9
+    private val PERMISSION_CAMERA = Manifest.permission.CAMERA
+
 
     private var _binding: FragmentScanBinding? = null
     private val binding get() = _binding!!
@@ -69,26 +78,31 @@ class ScanFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        pickImage()
         if (allPermissionsGranted()) {
-            pickImage()
+            Log.i("DEBUG", "permission granted")
             startCamera()
             binding.snapButton.setOnClickListener {
                 captureImage()
             }
         } else {
-            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            val requestPermissionLauncher = registerForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted ->
                 if (isGranted) {
                     Log.i("DEBUG", "permission granted")
-                    pickImage()
                     startCamera()
                     binding.snapButton.setOnClickListener {
                         captureImage()
                     }
                 } else {
-                    Toast.makeText(requireContext(), "Camera permission denied", Toast.LENGTH_SHORT).show()
-                    Log.i("DEBUG", "permission denied")
+                    Toast.makeText(requireContext(), "Camera permission is not granted.", Toast.LENGTH_SHORT).show()
+                    binding.snapButton.isClickable = false
+                    binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
+
                 }
             }
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
 
@@ -118,8 +132,8 @@ class ScanFragment : Fragment() {
         }
 
         try {
-            cameraProvider.unbindAll()
-            cameraProvider.bindToLifecycle(
+            cameraProvider?.unbindAll()
+            cameraProvider?.bindToLifecycle(
                 viewLifecycleOwner,
                 cameraSelector,
                 preview,
@@ -153,7 +167,7 @@ class ScanFragment : Fragment() {
         pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
             if (uri != null) {
                 val file = kotlin.io.path.createTempFile().toFile()
-                uri?.let { requireContext().contentResolver.openInputStream(it) }.use { input ->
+                uri.let { requireContext().contentResolver.openInputStream(it) }.use { input ->
                     file.outputStream().use { output ->
                         input?.copyTo(output)
                     }
@@ -214,9 +228,78 @@ class ScanFragment : Fragment() {
         dialog.show()
     }
 
+    fun requestRuntimePermission() {
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                PERMISSION_CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            pickImage()
+            startCamera()
+            binding.snapButton.setOnClickListener {
+                captureImage()
+            }
+
+        } else if (ActivityCompat.shouldShowRequestPermissionRationale(
+                requireActivity(),
+                PERMISSION_CAMERA
+            )
+        ) {
+            val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
+
+            builder.setMessage("Scan feature requires Camera permission .")
+                .setTitle("Permission Required").setCancelable(false)
+                .setPositiveButton("Ok") { dialog, which ->
+                    ActivityCompat.requestPermissions(
+                        requireActivity(),
+                        arrayOf(Manifest.permission.CAMERA),
+                        PERMISSION_CAMERA_CODE
+                    )
+                    dialog.dismiss();
+                }.setNegativeButton("Cancel") { dialog, which ->
+                    dialog.dismiss();
+                }
+        }
+        else {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(Manifest.permission.CAMERA),
+                PERMISSION_CAMERA_CODE
+            )
+        }
+    }
+
+
+//    @Deprecated("Deprecated in Java")
+//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+//
+//        Log.e(TAG, "TEST REQUEST PERMISSION RESULT")
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//
+//        if (requestCode == PERMISSION_CAMERA_CODE) {
+//            if (grantResults.size > 0 && grantResults[6] == PackageManager.PERMISSION_GRANTED) {
+//                pickImage()
+//                startCamera()
+//                binding.snapButton.setOnClickListener {
+//                    captureImage()
+//                }
+//                Toast.makeText(
+//                    requireContext(),
+//                    "Permission Granted. You can use the Scan feature.",
+//                    Toast.LENGTH_LONG
+//                ).show();
+//            } else if (!ActivityCompat.shouldShowRequestPermissionRationale(
+//                    requireActivity(),
+//                    PERMISSION_CAMERA
+//                )
+//            ) {
+//
+//            }
+//        }
+//    }
     override fun onDestroyView() {
         super.onDestroyView()
-        cameraProvider.unbindAll()
+        cameraProvider?.unbindAll()
         _binding = null
     }
 }
