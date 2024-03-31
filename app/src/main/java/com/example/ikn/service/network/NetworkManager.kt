@@ -34,15 +34,6 @@ class NetworkManager(private val connectivityManager: ConnectivityManager) {
                 Log.d(TAG, "Network Lost")
                 disconnectedBroadcast();
             }
-            override fun onCapabilitiesChanged(
-                network: Network,
-                networkCapabilities: NetworkCapabilities
-            ) {
-                super.onCapabilitiesChanged(network, networkCapabilities)
-                val unmetered = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
-
-                if (unmetered) disconnectedBroadcast() else connectedBroadcast()
-            }
         }
         connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
     }

@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import com.example.ikn.MainActivity
 import com.example.ikn.databinding.FragmentLoginBinding
+import com.example.ikn.repository.PreferenceRepository
 import com.example.ikn.repository.Repository
 import com.example.ikn.utils.SharedPreferencesManager
 import kotlinx.coroutines.CoroutineScope
@@ -39,15 +40,25 @@ class LoginFragment: Fragment() {
         binding = FragmentLoginBinding.inflate(inflater, container, false)
         signInBtn = binding.signInButton
 
-        val repo = Repository()
         val sharedPref = SharedPreferencesManager(requireContext())
-        val viewModel = LoginViewModel(repo, sharedPref)
+        val repo = Repository()
+        val prefRepo = PreferenceRepository(sharedPref)
+        val viewModel = LoginViewModel(repo, prefRepo)
+
+        /* Check isi Shared Pref */
+        Log.i("[LOGIN]", "isKeep ${prefRepo.isKeepLoggedIn()}, email ${prefRepo.getSignInInfo().first} ${prefRepo.getSignInInfo().first}")
+
+        if (viewModel.isAllowKeepLoggedIn()) {
+            startActivity(Intent(activity, MainActivity::class.java))
+            activity?.finish()
+        }
 
         signInBtn.setOnClickListener {
             Log.i("[LOGIN LISTENER]", "In Login Listener")
             signInHandler(
                 email = binding.emailEditText.text.toString(),
                 password = binding.passwordEditText.text.toString(),
+                isKeepLoggedIn = binding.checkBox.isChecked,
                 viewModel
                 )
         }
@@ -59,7 +70,13 @@ class LoginFragment: Fragment() {
                            startActivity(Intent(activity, MainActivity::class.java))
                            activity?.finish()
                        }
-                   , 3000)
+                   , 1000)
+            }
+        })
+
+        viewModel.failed.observe(viewLifecycleOwner, Observer { error ->
+            if (error) {
+                showToast(viewModel.failedMessage)
             }
         })
 
@@ -72,20 +89,12 @@ class LoginFragment: Fragment() {
         receiver = object : BroadcastReceiver() {
             override fun onReceive(ctx: Context?, intent: Intent?) {
                 if (intent?.action != "NETWORK_STATUS" && intent?.extras?.isEmpty!!) return
-//                Log.i("[RECEIVE BROADCAST]", "Hasil ${intent.action} , ${intent.extras?.getBoolean("status")}")
+
                 val status = intent.extras?.getBoolean("status")!!
 
                 signInBtn.isEnabled = status
 
-                if (status) {
-//                    CoroutineScope(Dispatchers.Main).launch {
-                        showToast("Internet Connected")
-//                    }
-                } else {
-//                    CoroutineScope(Dispatchers.Main).launch {
-                        showToast("Internet Disconnected")
-//                    }
-                }
+                if (status) showToast("Internet Connected") else showToast("Internet Disconnected")
             }
         }
         context?.registerReceiver(receiver, IntentFilter("NETWORK_STATUS"))
@@ -94,13 +103,17 @@ class LoginFragment: Fragment() {
         if (email.isEmpty() || password.isEmpty()) return false
         return emailRegex.matches(email)
     }
-    private fun signInHandler(email: String, password: String, viewModel: LoginViewModel) {
-        if (!validateSignIn(email, password)) {
-//            showToast()
-            Toast.makeText(requireActivity(), "Email or Password Invalid", Toast.LENGTH_SHORT, ).show()
-            return
+    private fun signInHandler(email: String, password: String, isKeepLoggedIn: Boolean, viewModel: LoginViewModel) {
+        try {
+            if (!validateSignIn(email, password)) {
+//            Toast.makeText(requireActivity(), "Email or Password Invalid", Toast.LENGTH_SHORT, ).show()
+                showToast("Email or Password Invalid")
+                return
+            }
+            viewModel.signInHandler(email, password, isKeepLoggedIn)
+        } catch (exp: Exception) {
+            showToast("Failed to Sign In")
         }
-        viewModel.loginHandler(email, password)
     }
     private fun showToast(message: String) {
         activity?.runOnUiThread {
