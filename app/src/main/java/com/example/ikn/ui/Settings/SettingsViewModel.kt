@@ -9,10 +9,15 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.ikn.data.AppDatabase
 import com.example.ikn.data.TransactionRepository
 import com.example.ikn.ui.transaction.Transaction
+import org.apache.poi.ss.usermodel.CellStyle
+import org.apache.poi.ss.usermodel.FillPatternType
+import org.apache.poi.ss.usermodel.Font
+import org.apache.poi.ss.usermodel.IndexedColors
 import org.apache.poi.ss.usermodel.WorkbookFactory
-import java.io.FileOutputStream
+import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+
 
 class SettingsViewModel(transactionRepository: TransactionRepository) : ViewModel() {
     val transactions: LiveData<List<Transaction>> = transactionRepository.transactions.asLiveData();
@@ -22,7 +27,7 @@ class SettingsViewModel(transactionRepository: TransactionRepository) : ViewMode
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(
                 modelClass: Class<T>,
-                extras: CreationExtras
+                extras: CreationExtras,
             ): T {
                 // Get the Application context from extras
                 val applicationContext = checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as? Context)
@@ -35,26 +40,35 @@ class SettingsViewModel(transactionRepository: TransactionRepository) : ViewMode
         }
     }
 
-    fun createExcel(path: String, isXlsx: Boolean) : String {
+    fun createExcel(transactions : List<Transaction>?, path: String, isXlsx: Boolean) : String {
+        if (transactions == null) return "";
+
         val workbook = WorkbookFactory.create(true)
         val sheet = workbook.createSheet("Sheet1")
 
         // Create header
         val headerRow = sheet.createRow(0)
         val headers = arrayOf("Title", "Category", "Amount", "Location", "Date")
+
+        // Style it
+        val headerCellStyle: CellStyle = workbook.createCellStyle()
+        headerCellStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.index)
+        headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND)
+        val font: Font = workbook.createFont()
+        font.setBold(true)
+        font.color = IndexedColors.WHITE.index
+        headerCellStyle.setFont(font)
+
         for (i in headers.indices) {
             val cell = headerRow.createCell(i)
             cell.setCellValue(headers[i])
+            cell.cellStyle = headerCellStyle
+            sheet.setColumnWidth(i, 15 * 256)
         }
 
-        val transactionsData = transactions.value
-
-        if (transactionsData == null) return "";
-
-
-        for (i in transactionsData.indices) {
+        for (i in transactions.indices) {
             val row = sheet.createRow(i + 1)
-            val transaction = transactionsData[i]
+            val transaction = transactions[i]
 
             val titleCell = row.createCell(0)
             titleCell.setCellValue(transaction.name)
@@ -77,16 +91,14 @@ class SettingsViewModel(transactionRepository: TransactionRepository) : ViewMode
         if (isXlsx) extension = ".xlsx"
 
         val currentDateTime = LocalDateTime.now()
-        val formatter = DateTimeFormatter.ofPattern("ss-mm-HH:dd-MM-yy")
+        val formatter = DateTimeFormatter.ofPattern("ss-mm-HH.dd-MM-yy")
         val formattedDateTime = currentDateTime.format(formatter)
 
         val filename = "TransactionsData$formattedDateTime";
-        val fullPath = "$path/$filename$extension"
 
-        val fileOut = FileOutputStream(fullPath)
-        workbook.write(fileOut)
-        fileOut.close()
-
-        return fullPath;
+        val outputFile = File("$path/$filename$extension")
+        workbook.write(outputFile.outputStream())
+        workbook.close()
+        return outputFile.path;
     }
 }
