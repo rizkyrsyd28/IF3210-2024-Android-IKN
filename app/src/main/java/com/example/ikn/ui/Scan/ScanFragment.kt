@@ -2,7 +2,6 @@ package com.example.ikn.ui.Scan
 
 import android.Manifest
 import android.app.AlertDialog
-import android.app.ProgressDialog
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -10,7 +9,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
@@ -60,9 +58,9 @@ class ScanFragment : Fragment() {
         scanViewModel.getBill().observe(viewLifecycleOwner) { response ->
             binding.progressBarCyclic.visibility = View.GONE
             if (response != null) {
-                creataDialog(response.items)
+                createDialog(response.items)
             } else {
-                creataDialog(null)
+                createDialog(null)
             }
         }
         return view
@@ -174,7 +172,7 @@ class ScanFragment : Fragment() {
         }
     }
 
-    fun creataDialog(billItems: Items?) {
+    fun createDialog(billItems: Items?) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
 
         val messageBuilder = StringBuilder()
@@ -198,6 +196,7 @@ class ScanFragment : Fragment() {
             titleBuilder.append("An Error Occurred")
             messageBuilder.append("An error has occurred")
             posBtnBuilder.append("Back")
+            negBtnBuilder.append("")
             negBtnBuilder.append("")
         }
 
