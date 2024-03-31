@@ -1,15 +1,18 @@
 package com.example.ikn.ui.transaction
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.net.Uri
 import com.example.ikn.R
 
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -19,6 +22,8 @@ import com.example.ikn.data.AppDatabase
 import com.example.ikn.data.TransactionRepository
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
 
 /**
  * A simple [Fragment] subclass.
@@ -35,6 +40,16 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionItemLong
         arguments?.let {
 
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    }
+
+    override fun onPause() {
+        super.onPause()
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
     }
 
     override fun onCreateView(
@@ -78,26 +93,26 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionItemLong
         val layoutManager = LinearLayoutManager(requireContext())
         transactionRecyclerView.layoutManager = layoutManager
 
-//        // Dummy data
-//        val dummyTransactions = listOf(
-//            Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
-//            Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
-//            Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta"),
-//            Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
-//            Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
-//            Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta"),
-//            Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
-//            Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
-//            Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta"),
-//            Transaction("9 Sep 2011", "Pembelian", "Crisbar", 49000, "Cisitu"),
-//            Transaction("30 Sep 1965", "Pemberontakan", "Lubang Buaya", 70000, "Jakarta"),
-//            Transaction("17 Aug 1945", "Kemerdekaan", "Proklamasi", 10000, "Jakarta")
-//        )
-//
-//        transactionAdapter.submitList(dummyTransactions)
+        val tvTransactionNameLatest = rootView.findViewById<TextView>(R.id.tvTransactionNameLatest)
+        val tvTransactionAmountLatest = rootView.findViewById<TextView>(R.id.tvAmountLatest)
+        val tvTransactionDateLatest = rootView.findViewById<TextView>(R.id.tvDateLatest)
+        val tvTransactionLocationLatest = rootView.findViewById<TextView>(R.id.tvLocationLatest)
+        val tvTransactionCategoryLatest = rootView.findViewById<TextView>(R.id.tvCategoryLatest)
+
+        val tvTotalAmount = rootView.findViewById<TextView>(R.id.tvAmountTotal)
 
         transactionViewModel.transactions.observe(viewLifecycleOwner) { transactionList ->
             transactionAdapter.submitList(transactionList)
+            tvTransactionNameLatest.text = transactionList[0].name
+            tvTransactionAmountLatest.text =
+                NumberFormat.getNumberInstance(Locale.US).format(transactionList[0].amount)
+            tvTransactionLocationLatest.text = transactionList[0].location
+            tvTransactionDateLatest.text = transactionList[0].date
+            tvTransactionCategoryLatest.text = transactionList[0].category
+        }
+
+        transactionViewModel.totalAmount.observe(viewLifecycleOwner) { totalAmount ->
+            tvTotalAmount.text = NumberFormat.getNumberInstance(Locale.US).format(totalAmount)
         }
 
         val newTransactionFloatingActionButton =
@@ -166,7 +181,27 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionItemLong
     }
 
     override fun onItemClick(transactionLocation: String) {
-        val gmmIntentURI = Uri.parse("geo:0,0?q=" + Uri.encode(transactionLocation))
+
+        val pattern = "\\((-?\\d+\\.\\d+), (-?\\d+\\.\\d+)\\)".toRegex()
+
+        val matchResult = pattern.find(transactionLocation)
+
+        val coordinates = matchResult?.let { result ->
+            val (lat, lon) = result.destructured
+            Pair(lat, lon)
+        }
+
+        val uriString = if (coordinates == null) {
+            "geo:0,0?q=" + Uri.encode(transactionLocation)
+        } else {
+            val lat = coordinates.first
+            val lon = coordinates.second
+            "geo:0,0?q=$lat,$lon"
+        }
+
+        Log.d("MAP Intent", "URI String: $uriString")
+
+        val gmmIntentURI = Uri.parse(uriString)
         val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentURI)
         mapIntent.setPackage("com.google.android.apps.maps")
         startActivity(mapIntent)
