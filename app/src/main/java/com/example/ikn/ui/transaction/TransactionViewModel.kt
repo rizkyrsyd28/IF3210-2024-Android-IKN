@@ -22,7 +22,19 @@ class TransactionViewModel(
 
     //    private val _transactionHistory = MutableLiveData(TransactionHistory())
 //    val transactionHistory: LiveData<TransactionHistory> = _transactionHistory.asStateFlow()
-    val transactions: LiveData<List<Transaction>> = transactionRepository.transactions.asLiveData()
+    private val _transactions: LiveData<List<Transaction>> = transactionRepository.transactions.asLiveData()
+    val transactions: LiveData<List<Transaction>> get() = _transactions
+
+    private val _totalAmount = MutableLiveData<Int>()
+    val totalAmount: LiveData<Int> get() = _totalAmount
+
+    init {
+        _transactions.observeForever { transactions ->
+            var total = 0
+            transactions?.forEach { total += it.amount }
+            _totalAmount.value = total
+        }
+    }
 
     companion object {
         val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {

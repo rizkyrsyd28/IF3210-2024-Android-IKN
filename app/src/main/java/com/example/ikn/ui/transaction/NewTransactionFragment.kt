@@ -1,5 +1,6 @@
 package com.example.ikn.ui.transaction
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -10,12 +11,15 @@ import android.view.ViewGroup
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.ikn.R
 import com.example.ikn.data.AppDatabase
 import com.example.ikn.data.TransactionCategory
 import com.example.ikn.data.TransactionRepository
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.launch
 
 /**
@@ -31,8 +35,26 @@ class NewTransactionFragment : Fragment() {
         )
     }
 
+    private val locationPermissionRequest = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permission ->
+        when {
+            permission.getOrDefault(android.Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
+                // Precise granted
+            }
+            permission.getOrDefault(android.Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
+                // Precise granted
+            } else -> {
+            // No permission granted
+        }
+        }
+    }
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         arguments?.let {
 
         }
@@ -60,20 +82,25 @@ class NewTransactionFragment : Fragment() {
             TransactionCategoryAdapter(requireContext(), R.layout.item_dropdown, categories)
         autoCompleteTextView.setAdapter(adapterItems)
 
+        autoCompleteTextView.hint = "Category"
+
         autoCompleteTextView.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                autoCompleteTextView.hint = " "
-                autoCompleteTextView.showDropDown()
-            } else {
+            if (hasFocus && autoCompleteTextView.text.isEmpty()) {
                 autoCompleteTextView.hint = "Category"
+                autoCompleteTextView.showDropDown()
+            } else if (!hasFocus && autoCompleteTextView.text.isEmpty()){
+                autoCompleteTextView.hint = "Category"
+            } else if (!hasFocus) {
+                autoCompleteTextView.hint = " "
             }
         }
 
-
+        var itemSelected = false
         autoCompleteTextView.setOnItemClickListener { parent, _, position, _ ->
             val selectedTransactionCategory =
                 parent.getItemAtPosition(position) as TransactionCategory
             autoCompleteTextView.setText(selectedTransactionCategory.toString())
+            itemSelected = true
             autoCompleteTextView.hint = " "
         }
 
@@ -96,6 +123,9 @@ class NewTransactionFragment : Fragment() {
                 } else {
                     // Set default text color when no text is entered
                     etNameNewTransaction.setTextColor(textIdleColor)
+                    if (!itemSelected && !autoCompleteTextView.hasFocus()) {
+                        autoCompleteTextView.hint = "Category"
+                    }
                 }
             }
         })
@@ -163,6 +193,37 @@ class NewTransactionFragment : Fragment() {
             lifecycleScope.launch {
                 transactionRepository.insertTransaction(newTransaction)
                 parentFragmentManager.popBackStack()
+            }
+
+        }
+
+        val getLocationButton = rootView.findViewById<Button>(R.id.btnGetLocationNewTransaction)
+        getLocationButton.setOnClickListener {
+
+            val fineLocationPermissionGranted = ContextCompat.checkSelfPermission(
+                requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+            val coarseLocationPermissionGranted = ContextCompat.checkSelfPermission(
+                requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (!fineLocationPermissionGranted || !coarseLocationPermissionGranted) {
+                locationPermissionRequest.launch(arrayOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                ))
+            }
+
+            if (fineLocationPermissionGranted || coarseLocationPermissionGranted) {
+                fusedLocationClient.lastLocation
+                    .addOnSuccessListener { location ->
+                        if (location != null) {
+                            val lat = location.latitude
+                            val lon = location.longitude
+                            etLocationNewTransaction.setText("($lat, $lon)")
+                        }
+                    }
             }
 
         }
