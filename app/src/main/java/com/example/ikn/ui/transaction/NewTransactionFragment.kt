@@ -277,6 +277,9 @@ class NewTransactionFragment : Fragment() {
         return rootView
     }
 
+    private fun generateField() {
+
+    }
     companion object {
         /**
          * Use this factory method to create a new instance of

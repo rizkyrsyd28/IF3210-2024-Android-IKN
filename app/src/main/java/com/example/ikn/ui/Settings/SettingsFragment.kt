@@ -9,12 +9,19 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import com.example.ikn.R
 import com.example.ikn.databinding.FragmentSettingsBinding
 import com.example.ikn.ui.Scan.ScanFragment
+import com.example.ikn.ui.transaction.NewTransactionFragment
 import com.example.ikn.ui.transaction.Transaction
+import com.example.ikn.ui.transaction.TransactionFragment
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.launch
 import java.io.File
 
 
@@ -42,14 +49,14 @@ class SettingsFragment : Fragment() {
             this.transactionList = transactionList
         }
 
-
         binding.btnSettingsSavedTransactions.setOnClickListener {
             saveTransactions();
         }
 
+
     }
 
-    fun saveTransactions() {
+    private fun saveTransactions() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
 
         val message = "Which excel extension do you wanted to save?"
@@ -79,7 +86,7 @@ class SettingsFragment : Fragment() {
         dialog.show()
     }
 
-    fun openExcel(filePath: String) {
+    private fun openExcel(filePath: String) {
         Log.e("SettingsFragment", filePath)
         val file: File = File(filePath)
         val fileUri = FileProvider.getUriForFile(requireContext(), "com.example.ikn.fileprovider", file);
