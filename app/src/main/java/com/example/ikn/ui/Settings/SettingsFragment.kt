@@ -50,7 +50,7 @@ class SettingsFragment : Fragment() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
 
         val message = "Which excel extension do you wanted to save?"
-        val title = "Excel Extension"t
+        val title = "Excel Extension"
         val posBtn = ".xlsx"
         val negBtn = ".xls"
 
