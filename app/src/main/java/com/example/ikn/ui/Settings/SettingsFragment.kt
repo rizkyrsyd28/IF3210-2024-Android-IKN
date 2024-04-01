@@ -43,6 +43,11 @@ class SettingsFragment : Fragment() {
         binding.btnSettingsSavedTransactions.setOnClickListener {
             saveTransactions();
         }
+        binding.btnLogout.setOnClickListener {
+            settingsViewModel.signOutHandle()
+            startActivity(Intent(activity, SplashActivity::class.java))
+            activity?.finish()
+        }
 
     }
 
