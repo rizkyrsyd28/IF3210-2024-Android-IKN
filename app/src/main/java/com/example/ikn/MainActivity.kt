@@ -6,11 +6,13 @@ import android.content.IntentFilter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.ikn.data.AppDatabase
 import com.example.ikn.databinding.ActivityMainBinding
 import com.example.ikn.repository.PreferenceRepository
+import com.example.ikn.service.network.NetworkBroadcastReceiver
 import com.example.ikn.service.network.NetworkService
 import com.example.ikn.service.token.TokenBroadcastReceiver
 import com.example.ikn.service.token.TokenService
@@ -20,6 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var appDatabase: AppDatabase
     private lateinit var tokenReceiver: TokenBroadcastReceiver
+    private lateinit var networkReceiver: NetworkBroadcastReceiver
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,6 +35,9 @@ class MainActivity : AppCompatActivity() {
 
         tokenReceiver = TokenBroadcastReceiver(forceLogOutHandler = { signOutHandler() })
         registerReceiver(tokenReceiver, IntentFilter("TOKEN_LOGOUT"))
+
+        networkReceiver = NetworkBroadcastReceiver()
+        registerReceiver(networkReceiver, IntentFilter("NETWORK_STATUS"))
 
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -86,6 +92,13 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(tokenReceiver)
+        unregisterReceiver(networkReceiver)
         Log.w("[MAIN]", "Main Destroy Config - $isChangingConfigurations, finsih - $isFinishing")
+    }
+
+    private fun showToast(message: String) {
+        runOnUiThread {
+            Toast.makeText(this, message, Toast.LENGTH_SHORT, ).show()
+        }
     }
 }
