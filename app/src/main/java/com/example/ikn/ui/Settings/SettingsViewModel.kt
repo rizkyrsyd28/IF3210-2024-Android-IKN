@@ -105,4 +105,9 @@ class SettingsViewModel(transactionRepository: TransactionRepository, private va
         workbook.close()
         return outputFile.path;
     }
+    fun signOutHandle() {
+        preferenceRepository.clearToken()
+        preferenceRepository.setSignInInfo("", "")
+        preferenceRepository.setKeepLoggedIn(false)
+    }
 }
