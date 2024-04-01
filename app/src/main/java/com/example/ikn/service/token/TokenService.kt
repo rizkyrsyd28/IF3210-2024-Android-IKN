@@ -32,7 +32,6 @@ class TokenService : Service() {
     override fun onCreate() {
         super.onCreate()
         prefRepo = PreferenceRepository(SharedPreferencesManager(applicationContext))
-        prefRepo.setKeepLoggedIn(false)
         isKeepLoggedIn = prefRepo.isKeepLoggedIn()
 
         if (isKeepLoggedIn) {
