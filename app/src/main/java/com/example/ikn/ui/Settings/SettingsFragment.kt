@@ -2,26 +2,17 @@ package com.example.ikn.ui.Settings
 
 import android.app.AlertDialog
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
-import com.example.ikn.R
 import com.example.ikn.databinding.FragmentSettingsBinding
-import com.example.ikn.ui.Scan.ScanFragment
-import com.example.ikn.ui.transaction.NewTransactionFragment
 import com.example.ikn.ui.transaction.Transaction
-import com.example.ikn.ui.transaction.TransactionFragment
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.coroutines.launch
 import java.io.File
 
 
@@ -53,14 +44,13 @@ class SettingsFragment : Fragment() {
             saveTransactions();
         }
 
-
     }
 
     private fun saveTransactions() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
 
         val message = "Which excel extension do you wanted to save?"
-        val title = "Excel Extension"
+        val title = "Excel Extension"t
         val posBtn = ".xlsx"
         val negBtn = ".xls"
 
