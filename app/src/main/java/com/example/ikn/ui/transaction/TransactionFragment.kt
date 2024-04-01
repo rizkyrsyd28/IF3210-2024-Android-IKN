@@ -126,13 +126,6 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionItemLong
                 .commit()
         }
 
-        val spm = SharedPreferencesManager(requireContext())
-        val token = spm.getString("TOKEN")
-        val email = spm.getString("EMAIL")
-
-        Log.d("Transaction User Data", "User Token: $token")
-        Log.d("Transaction User Data", "User Email: $email")
-
         return rootView
     }
 
