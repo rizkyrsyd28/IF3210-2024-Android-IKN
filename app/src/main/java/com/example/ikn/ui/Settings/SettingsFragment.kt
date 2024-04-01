@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.example.ikn.SplashActivity
 import com.example.ikn.databinding.FragmentSettingsBinding
 import com.example.ikn.ui.transaction.Transaction
 import java.io.File
