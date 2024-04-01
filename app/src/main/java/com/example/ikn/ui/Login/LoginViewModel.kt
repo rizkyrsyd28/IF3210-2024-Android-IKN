@@ -40,6 +40,7 @@ class LoginViewModel(private val repo: Repository, private val prefRepo: Prefere
             }
 
             _authorized.value = true
+            prefRepo.setSignInInfo(email, password)
             prefRepo.saveToken(res.body()!!.token)
             prefRepo.setKeepLoggedIn(isKeepLoggedIn)
 
@@ -68,11 +69,4 @@ class LoginViewModel(private val repo: Repository, private val prefRepo: Prefere
         return result
     }
 
-//    fun isAllowKeepLoggedIn(): Boolean {
-//        val isKeepLoggedIn = prefRepo.isKeepLoggedIn()
-//        val signInInfo = prefRepo.getSignInInfo()
-//
-//        if (!isKeepLoggedIn) return false
-//        return !(signInInfo.first == "" && signInInfo.second == "")
-//    }
 }
