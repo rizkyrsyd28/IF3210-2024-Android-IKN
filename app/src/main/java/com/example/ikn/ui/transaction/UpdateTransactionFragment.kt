@@ -18,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.ikn.R
 import com.example.ikn.data.AppDatabase
 import com.example.ikn.data.TransactionRepository
+import com.example.ikn.utils.SharedPreferencesManager
 import kotlinx.coroutines.launch
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -46,7 +47,8 @@ class UpdateTransactionFragment : Fragment() {
 
     private val transactionRepository: TransactionRepository by lazy {
         TransactionRepository.getInstance(
-            AppDatabase.getInstance(requireContext()).transactionDao()
+            AppDatabase.getInstance(requireContext()).transactionDao(),
+            SharedPreferencesManager(requireContext())
         )
     }
 

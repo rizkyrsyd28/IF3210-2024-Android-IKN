@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.ikn.data.AppDatabase
 import com.example.ikn.data.TransactionRepository
 import com.example.ikn.ui.transaction.Transaction
+import com.example.ikn.utils.SharedPreferencesManager
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.ss.usermodel.FillPatternType
 import org.apache.poi.ss.usermodel.Font
@@ -33,7 +34,8 @@ class SettingsViewModel(transactionRepository: TransactionRepository) : ViewMode
                 val applicationContext = checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as? Context)
                 return SettingsViewModel(
                     TransactionRepository.getInstance(
-                        AppDatabase.getInstance(applicationContext).transactionDao()
+                        AppDatabase.getInstance(applicationContext).transactionDao(),
+                        SharedPreferencesManager(applicationContext)
                     )
                 ) as T
             }

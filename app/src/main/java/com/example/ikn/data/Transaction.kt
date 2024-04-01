@@ -12,6 +12,6 @@ data class Transaction(
     val category: TransactionCategory,
     val amount: Int,
     val location: String,
+    val nim: String,
     val date: Calendar = Calendar.getInstance()
-    // TODO: Add user email
 )

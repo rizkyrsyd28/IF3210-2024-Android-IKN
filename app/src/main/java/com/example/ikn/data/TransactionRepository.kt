@@ -2,7 +2,9 @@ package com.example.ikn.data
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
+import com.example.ikn.repository.PreferenceRepository
 import com.example.ikn.ui.transaction.Transaction
+import com.example.ikn.utils.SharedPreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -13,11 +15,14 @@ import java.util.Locale
 
 class TransactionRepository(
     private val transactionDao: TransactionDao,
+    private val sharedPreferencesManager: SharedPreferencesManager,
 ) {
 
     private val dateFormat = SimpleDateFormat("dd MMM yyy", Locale.US)
     private val dateFormFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
-    val transactions: Flow<List<Transaction>> = transactionDao.getAllTransactions()
+    val transactions: Flow<List<Transaction>> = transactionDao.getAllTransactions(
+        sharedPreferencesManager.get(PreferenceRepository.emailKey).toString().substringBefore("@")
+    )
         .map { transactions ->
             transactions.map { transaction ->
                 Transaction(
@@ -33,11 +38,12 @@ class TransactionRepository(
 
     suspend fun insertTransaction(transaction: Transaction) {
 
-        val newTransaction = Transaction(
+        val newTransaction = com.example.ikn.data.Transaction(
             name = transaction.name,
             amount = transaction.amount,
             location = transaction.location,
             category = TransactionCategory.valueOf(transaction.category),
+            nim = sharedPreferencesManager.get(PreferenceRepository.emailKey).toString().substringBefore("@")
         )
         transactionDao.insertTransaction(
             newTransaction
@@ -67,15 +73,16 @@ class TransactionRepository(
         val calendar = Calendar.getInstance()
         calendar.time = dateFormFormat.parse(transaction.date)!!
 
-        val newTransaction = Transaction(
+        val newTransaction = com.example.ikn.data.Transaction(
             id = transaction.id,
             name = transaction.name,
             date = calendar,
             amount = transaction.amount,
             location = transaction.location,
             category = TransactionCategory.valueOf(transaction.category),
+            nim = sharedPreferencesManager.get(PreferenceRepository.emailKey).toString().substringBefore("@")
         )
-        transactionDao.insertTransaction(
+        transactionDao.updateTransaction(
             newTransaction
         )
     }
@@ -88,9 +95,15 @@ class TransactionRepository(
         @Volatile
         private var instance: TransactionRepository? = null
 
-        fun getInstance(transactionDao: TransactionDao) =
+        fun getInstance(
+            transactionDao: TransactionDao,
+            sharedPreferencesManager: SharedPreferencesManager,
+        ) =
             instance ?: synchronized(this) {
-                instance ?: TransactionRepository(transactionDao).also { instance = it }
+                instance ?: TransactionRepository(
+                    transactionDao,
+                    sharedPreferencesManager
+                ).also { instance = it }
             }
     }
 }

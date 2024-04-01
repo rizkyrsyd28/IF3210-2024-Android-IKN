@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.ikn.MainActivity
 import com.example.ikn.data.AppDatabase
 import com.example.ikn.data.TransactionRepository
+import com.example.ikn.utils.SharedPreferencesManager
 
 
 class TransactionViewModel(
@@ -50,7 +51,8 @@ class TransactionViewModel(
 
                 return TransactionViewModel(
                     TransactionRepository.getInstance(
-                        AppDatabase.getInstance(applicationContext).transactionDao()
+                        AppDatabase.getInstance(applicationContext).transactionDao(),
+                        SharedPreferencesManager(applicationContext)
                     ),
                     savedStateHandle
                 ) as T

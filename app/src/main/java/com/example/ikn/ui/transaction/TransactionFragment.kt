@@ -13,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -20,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ikn.data.AppDatabase
 import com.example.ikn.data.TransactionRepository
+import com.example.ikn.repository.PreferenceRepository
 import com.example.ikn.utils.SharedPreferencesManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
@@ -100,16 +102,22 @@ class TransactionFragment() : Fragment(), TransactionAdapter.OnTransactionItemLo
         val tvTransactionLocationLatest = rootView.findViewById<TextView>(R.id.tvLocationLatest)
         val tvTransactionCategoryLatest = rootView.findViewById<TextView>(R.id.tvCategoryLatest)
 
+        val latestTransactionCardView = rootView.findViewById<CardView>(R.id.cvLatestTransaction)
+
         val tvTotalAmount = rootView.findViewById<TextView>(R.id.tvAmountTotal)
 
         transactionViewModel.transactions.observe(viewLifecycleOwner) { transactionList ->
             transactionAdapter.submitList(transactionList)
-            tvTransactionNameLatest.text = transactionList[0].name
-            tvTransactionAmountLatest.text =
-                NumberFormat.getNumberInstance(Locale.US).format(transactionList[0].amount)
-            tvTransactionLocationLatest.text = transactionList[0].location
-            tvTransactionDateLatest.text = transactionList[0].date
-            tvTransactionCategoryLatest.text = transactionList[0].category
+            if (transactionList.isNotEmpty()) {
+                tvTransactionNameLatest.text = transactionList[0].name
+                tvTransactionAmountLatest.text =
+                    NumberFormat.getNumberInstance(Locale.US).format(transactionList[0].amount)
+                tvTransactionLocationLatest.text = transactionList[0].location
+                tvTransactionDateLatest.text = transactionList[0].date
+                tvTransactionCategoryLatest.text = transactionList[0].category
+            } else {
+                latestTransactionCardView.visibility = View.GONE
+            }
         }
 
         transactionViewModel.totalAmount.observe(viewLifecycleOwner) { totalAmount ->
@@ -125,6 +133,12 @@ class TransactionFragment() : Fragment(), TransactionAdapter.OnTransactionItemLo
                 .addToBackStack("new_transaction")
                 .commit()
         }
+
+        val nim =
+            SharedPreferencesManager(requireContext()).get(PreferenceRepository.emailKey).toString()
+                .substringBefore("@")
+
+        Log.d("MIGRATION", "Nim: $nim")
 
         return rootView
     }
@@ -150,7 +164,8 @@ class TransactionFragment() : Fragment(), TransactionAdapter.OnTransactionItemLo
     override fun onItemLongClick(transactionId: Int) {
         lifecycleScope.launch {
             val clickedTransaction = TransactionRepository.getInstance(
-                AppDatabase.getInstance(requireContext()).transactionDao()
+                AppDatabase.getInstance(requireContext()).transactionDao(),
+                SharedPreferencesManager(requireContext())
             ).getTransactionById(transactionId)
 
             if (clickedTransaction != null) {
@@ -175,7 +190,8 @@ class TransactionFragment() : Fragment(), TransactionAdapter.OnTransactionItemLo
     override fun onDeleteItem(transactionId: Int) {
         lifecycleScope.launch {
             TransactionRepository.getInstance(
-                AppDatabase.getInstance(requireContext()).transactionDao()
+                AppDatabase.getInstance(requireContext()).transactionDao(),
+                SharedPreferencesManager(requireContext())
             ).deleteTransaction(transactionId)
         }
     }

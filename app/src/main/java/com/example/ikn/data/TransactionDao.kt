@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TransactionDao {
-    @Query("SELECT * FROM transactions ORDER BY date DESC")
-    fun getAllTransactions(): Flow<List<Transaction>>
+    @Query("SELECT * FROM transactions WHERE nim = :nim ORDER BY date DESC")
+    fun getAllTransactions(nim: String): Flow<List<Transaction>>
 
     @Query("SELECT * FROM transactions WHERE id = :transactionId")
     suspend fun getTransactionById(transactionId: Int): Transaction?

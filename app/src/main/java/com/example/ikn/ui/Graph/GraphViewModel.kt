@@ -10,6 +10,7 @@ import com.example.ikn.data.AppDatabase
 import com.example.ikn.data.TransactionCategory
 import com.example.ikn.data.TransactionRepository
 import com.example.ikn.ui.transaction.Transaction
+import com.example.ikn.utils.SharedPreferencesManager
 
 class GraphViewModel(transactionRepository: TransactionRepository) : ViewModel() {
     val transactions: LiveData<List<Transaction>> = transactionRepository.transactions.asLiveData();
@@ -25,7 +26,8 @@ class GraphViewModel(transactionRepository: TransactionRepository) : ViewModel()
                 val applicationContext = checkNotNull(extras[APPLICATION_KEY] as? Context)
                 return GraphViewModel(
                     TransactionRepository.getInstance(
-                        AppDatabase.getInstance(applicationContext).transactionDao()
+                        AppDatabase.getInstance(applicationContext).transactionDao(),
+                        SharedPreferencesManager(applicationContext)
                     )
                 ) as T
             }
