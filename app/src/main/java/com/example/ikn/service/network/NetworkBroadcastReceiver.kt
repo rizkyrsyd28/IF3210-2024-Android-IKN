@@ -24,7 +24,7 @@ class NetworkBroadcastReceiver : BroadcastReceiver() {
 
         val status = intent.extras?.getBoolean(EXTRAS_KEY)!!
 
-        if (status) connectedHandler else disconnectHandler
+        if (status) connectedHandler() else disconnectHandler()
     }
 
     companion object {

@@ -17,9 +17,6 @@ class LoginActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_login)
 
-//        val service = (Intent(this, NetworkService::class.java))
-//        startService(service)
-
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView2, LoginFragment.newInstance())
