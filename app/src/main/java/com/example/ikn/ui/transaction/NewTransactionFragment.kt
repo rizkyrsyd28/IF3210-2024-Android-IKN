@@ -4,6 +4,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -18,8 +19,14 @@ import com.example.ikn.R
 import com.example.ikn.data.AppDatabase
 import com.example.ikn.data.TransactionCategory
 import com.example.ikn.data.TransactionRepository
+import com.example.ikn.repository.PreferenceRepository
+import com.example.ikn.utils.SharedPreferencesManager
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import kotlinx.coroutines.launch
 
 /**
@@ -42,11 +49,14 @@ class NewTransactionFragment : Fragment() {
             permission.getOrDefault(android.Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
                 // Precise granted
             }
+
             permission.getOrDefault(android.Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
                 // Precise granted
-            } else -> {
-            // No permission granted
-        }
+            }
+
+            else -> {
+                // No permission granted
+            }
         }
     }
 
@@ -62,16 +72,18 @@ class NewTransactionFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         // Inflate the layout for this fragment
 
         val rootView = inflater.inflate(R.layout.fragment_new_transaction, container, false)
 
-        val textIdleColor = ContextCompat.getColor(requireContext(),
+        val textIdleColor = ContextCompat.getColor(
+            requireContext(),
             R.color.md_theme_light_onTertiaryContainer
         )
-        val textFocusColor = ContextCompat.getColor(requireContext(),
+        val textFocusColor = ContextCompat.getColor(
+            requireContext(),
             R.color.md_theme_light_onPrimary
         )
 
@@ -88,7 +100,7 @@ class NewTransactionFragment : Fragment() {
             if (hasFocus && autoCompleteTextView.text.isEmpty()) {
                 autoCompleteTextView.hint = "Category"
                 autoCompleteTextView.showDropDown()
-            } else if (!hasFocus && autoCompleteTextView.text.isEmpty()){
+            } else if (!hasFocus && autoCompleteTextView.text.isEmpty()) {
                 autoCompleteTextView.hint = "Category"
             } else if (!hasFocus) {
                 autoCompleteTextView.hint = " "
@@ -153,7 +165,8 @@ class NewTransactionFragment : Fragment() {
             }
         })
 
-        val etLocationNewTransaction = rootView.findViewById<EditText>(R.id.etLocationNewTransaction)
+        val etLocationNewTransaction =
+            rootView.findViewById<EditText>(R.id.etLocationNewTransaction)
 
         etLocationNewTransaction.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -199,34 +212,67 @@ class NewTransactionFragment : Fragment() {
 
         val getLocationButton = rootView.findViewById<Button>(R.id.btnGetLocationNewTransaction)
         getLocationButton.setOnClickListener {
+            Log.i("Location Button", "Location permission given")
 
             val fineLocationPermissionGranted = ContextCompat.checkSelfPermission(
                 requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
 
-            val coarseLocationPermissionGranted = ContextCompat.checkSelfPermission(
-                requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-
-            if (!fineLocationPermissionGranted || !coarseLocationPermissionGranted) {
-                locationPermissionRequest.launch(arrayOf(
-                    android.Manifest.permission.ACCESS_FINE_LOCATION,
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION
-                ))
+            if (!fineLocationPermissionGranted) {
+                locationPermissionRequest.launch(
+                    arrayOf(
+                        android.Manifest.permission.ACCESS_FINE_LOCATION
+                    )
+                )
             }
 
-            if (fineLocationPermissionGranted || coarseLocationPermissionGranted) {
+            if (fineLocationPermissionGranted) {
                 fusedLocationClient.lastLocation
                     .addOnSuccessListener { location ->
                         if (location != null) {
                             val lat = location.latitude
                             val lon = location.longitude
                             etLocationNewTransaction.setText("($lat, $lon)")
+                            Log.i("Location Button", "Current Location: $lat, $lon")
+                        } else {
+                            Log.i("Location Button", "Null location")
+                            val locationCallback = object : LocationCallback() {
+                                override fun onLocationResult(p0: LocationResult) {
+                                    if (p0.locations.isNotEmpty()) {
+                                        val newLocation = p0.locations[0]
+                                        val lat = newLocation.latitude
+                                        val lon = newLocation.longitude
+                                        etLocationNewTransaction.setText("($lat, $lon)")
+                                        Log.i("Location Button", "Current Location: $lat, $lon")
+                                    }
+                                }
+                            }
+
+                            val locationRequest = LocationRequest.Builder(
+                                Priority.PRIORITY_HIGH_ACCURACY,
+                                0
+                            ).build()
+
+                            fusedLocationClient.requestLocationUpdates(
+                                locationRequest,
+                                locationCallback,
+                                null
+                            )
                         }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.i("Location Button", exception.message.toString())
                     }
             }
 
         }
+
+        val email =
+            PreferenceRepository(SharedPreferencesManager(requireContext()))
+                .getSignInInfo()
+                .first
+
+        Log.d("SPM", "User email: $email")
 
         return rootView
     }
