@@ -151,7 +151,8 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionItemLong
     override fun onItemLongClick(transactionId: Int) {
         lifecycleScope.launch {
             val clickedTransaction = TransactionRepository.getInstance(
-                AppDatabase.getInstance(requireContext()).transactionDao()
+                AppDatabase.getInstance(requireContext()).transactionDao(),
+                SharedPreferencesManager(requireContext())
             ).getTransactionById(transactionId)
 
             if (clickedTransaction != null) {
@@ -176,7 +177,8 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionItemLong
     override fun onDeleteItem(transactionId: Int) {
         lifecycleScope.launch {
             TransactionRepository.getInstance(
-                AppDatabase.getInstance(requireContext()).transactionDao()
+                AppDatabase.getInstance(requireContext()).transactionDao(),
+                SharedPreferencesManager(requireContext())
             ).deleteTransaction(transactionId)
         }
     }

@@ -38,7 +38,8 @@ class NewTransactionFragment : Fragment() {
 
     private val transactionRepository: TransactionRepository by lazy {
         TransactionRepository.getInstance(
-            AppDatabase.getInstance(requireContext()).transactionDao()
+            AppDatabase.getInstance(requireContext()).transactionDao(),
+            SharedPreferencesManager(requireContext())
         )
     }
 
