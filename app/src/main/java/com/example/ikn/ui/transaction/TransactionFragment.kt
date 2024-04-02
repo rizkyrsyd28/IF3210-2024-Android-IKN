@@ -33,7 +33,7 @@ import java.util.Locale
  * Use the [TransactionFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionItemLongClickListener,
+class TransactionFragment() : Fragment(), TransactionAdapter.OnTransactionItemLongClickListener,
     TransactionAdapter.OnDeleteListener, TransactionAdapter.OnTransactionItemClickListener {
 
     private val transactionViewModel: TransactionViewModel by viewModels { TransactionViewModel.Factory }
@@ -157,7 +157,6 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionItemLong
         fun newInstance(param1: String, param2: String) =
             TransactionFragment().apply {
                 arguments = Bundle().apply {
-
                 }
             }
     }

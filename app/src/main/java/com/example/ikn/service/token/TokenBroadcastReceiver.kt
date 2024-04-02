@@ -11,7 +11,7 @@ class TokenBroadcastReceiver(
     override fun onReceive(context: Context, intent: Intent) {
         Log.i(TAG, "intent = ${intent.action}")
         if (intent.action != ACTION) return
-        forceLogOutHandler()
+         forceLogOutHandler()
     }
 
     companion object {

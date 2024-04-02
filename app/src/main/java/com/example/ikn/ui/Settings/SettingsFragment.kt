@@ -2,7 +2,7 @@ package com.example.ikn.ui.Settings
 
 import android.app.AlertDialog
 import android.content.Intent
-import android.net.Uri
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -12,8 +12,8 @@ import android.view.ViewGroup
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.example.ikn.SplashActivity
 import com.example.ikn.databinding.FragmentSettingsBinding
-import com.example.ikn.ui.Scan.ScanFragment
 import com.example.ikn.ui.transaction.Transaction
 import java.io.File
 
@@ -32,6 +32,7 @@ class SettingsFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
+//        requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         return binding.root
     }
 
@@ -42,14 +43,18 @@ class SettingsFragment : Fragment() {
             this.transactionList = transactionList
         }
 
-
         binding.btnSettingsSavedTransactions.setOnClickListener {
             saveTransactions();
+        }
+        binding.btnLogout.setOnClickListener {
+            settingsViewModel.signOutHandle()
+            startActivity(Intent(activity, SplashActivity::class.java))
+            activity?.finish()
         }
 
     }
 
-    fun saveTransactions() {
+    private fun saveTransactions() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
 
         val message = "Which excel extension do you wanted to save?"
@@ -66,6 +71,7 @@ class SettingsFragment : Fragment() {
                 val filepath = settingsViewModel.createExcel(this.transactionList, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).path, true)
                 openExcel(filepath)
                 binding.progressBarCyclic.visibility = View.GONE
+                dialog.dismiss()
             }
             .setNegativeButton(negBtn) { dialog, which ->
                 binding.progressBarCyclic.visibility = View.VISIBLE
@@ -73,13 +79,14 @@ class SettingsFragment : Fragment() {
                 val filepath = settingsViewModel.createExcel(this.transactionList, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).path, false)
                 openExcel(filepath)
                 binding.progressBarCyclic.visibility = View.GONE
+                dialog.dismiss()
             }
 
         val dialog: AlertDialog = builder.create()
         dialog.show()
     }
 
-    fun openExcel(filePath: String) {
+    private fun openExcel(filePath: String) {
         Log.e("SettingsFragment", filePath)
         val file: File = File(filePath)
         val fileUri = FileProvider.getUriForFile(requireContext(), "com.example.ikn.fileprovider", file);

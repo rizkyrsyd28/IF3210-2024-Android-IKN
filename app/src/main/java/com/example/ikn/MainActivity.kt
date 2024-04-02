@@ -39,6 +39,9 @@ class MainActivity : AppCompatActivity() {
         networkReceiver = NetworkBroadcastReceiver()
         registerReceiver(networkReceiver, IntentFilter("NETWORK_STATUS"))
 
+//        networkReceiver.setConnectedHandler { Log.e("network handler main", "connected") }
+//        networkReceiver.setDisconnectedHandler { Log.e("network handler main", "disconnected") }
+
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

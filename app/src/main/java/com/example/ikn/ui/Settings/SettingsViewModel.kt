@@ -8,6 +8,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.ikn.data.AppDatabase
 import com.example.ikn.data.TransactionRepository
+import com.example.ikn.repository.PreferenceRepository
 import com.example.ikn.ui.transaction.Transaction
 import com.example.ikn.utils.SharedPreferencesManager
 import org.apache.poi.ss.usermodel.CellStyle
@@ -20,7 +21,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 
-class SettingsViewModel(transactionRepository: TransactionRepository) : ViewModel() {
+class SettingsViewModel(transactionRepository: TransactionRepository, private val preferenceRepository: PreferenceRepository) : ViewModel() {
     val transactions: LiveData<List<Transaction>> = transactionRepository.transactions.asLiveData();
 
     companion object {
@@ -36,7 +37,8 @@ class SettingsViewModel(transactionRepository: TransactionRepository) : ViewMode
                     TransactionRepository.getInstance(
                         AppDatabase.getInstance(applicationContext).transactionDao(),
                         SharedPreferencesManager(applicationContext)
-                    )
+                    ),
+                    PreferenceRepository(SharedPreferencesManager(applicationContext))
                 ) as T
             }
         }
@@ -102,5 +104,10 @@ class SettingsViewModel(transactionRepository: TransactionRepository) : ViewMode
         workbook.write(outputFile.outputStream())
         workbook.close()
         return outputFile.path;
+    }
+    fun signOutHandle() {
+        preferenceRepository.clearToken()
+        preferenceRepository.setSignInInfo("", "")
+        preferenceRepository.setKeepLoggedIn(false)
     }
 }
