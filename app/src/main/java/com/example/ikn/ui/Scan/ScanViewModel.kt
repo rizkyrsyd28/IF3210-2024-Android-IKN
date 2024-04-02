@@ -2,12 +2,14 @@ package com.example.ikn.ui.Scan
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ikn.model.response.BillResponse
+import com.example.ikn.repository.PreferenceRepository
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -17,7 +19,7 @@ import com.example.ikn.utils.SharedPreferencesManager
 import kotlinx.coroutines.launch
 
 class ScanViewModel(): ViewModel() {
-    private val bill: MutableLiveData<BillResponse> = MutableLiveData()
+    private val bill: MutableLiveData<BillResponse?> = MutableLiveData()
     private val repository = Repository()
 
     companion object {
@@ -49,16 +51,17 @@ class ScanViewModel(): ViewModel() {
 
     fun doPostBill(file: File, context: Context) = viewModelScope.launch {
         try {
-            val sharedPref = SharedPreferencesManager(context)
-            val token = sharedPref.get("TOKEN")
+            val sharedPref = PreferenceRepository(SharedPreferencesManager(context))
+            val token = sharedPref.getToken()
+            Log.e("TOKEN", token)
 
             var fetchedBill : BillResponse? = null
             if (!token.isNullOrBlank()) {
                 val response = repository.postBill(file, token)
                 fetchedBill = response.body()
-                println(response.body())
+                Log.e("PostBill", fetchedBill.toString())
             }
-            bill.value = fetchedBill!!;
+            bill.value = fetchedBill;
         } catch (e: Exception) {
             e.printStackTrace()
         }
