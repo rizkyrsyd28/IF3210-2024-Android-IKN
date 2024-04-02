@@ -29,10 +29,22 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.ikn.MainActivity
+import com.example.ikn.data.AppDatabase
+import com.example.ikn.data.TransactionRepository
 import com.example.ikn.databinding.FragmentScanBinding
 import com.example.ikn.model.response.item.Items
 import com.example.ikn.service.network.NetworkBroadcastReceiver
+import com.example.ikn.ui.transaction.Transaction
+import com.example.ikn.utils.SharedPreferencesManager
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import kotlinx.coroutines.launch
 
 
 class ScanFragment : Fragment() {
@@ -41,20 +53,25 @@ class ScanFragment : Fragment() {
     private lateinit var pickMedia: ActivityResultLauncher<PickVisualMediaRequest>
     private lateinit var scanViewModel: ScanViewModel
     private lateinit var networkReceiver: NetworkBroadcastReceiver
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private val transactionRepository: TransactionRepository by lazy {
+        TransactionRepository.getInstance(
+            AppDatabase.getInstance(requireContext()).transactionDao(),
+            SharedPreferencesManager(requireContext())
+        )
+    }
 
     private var _binding: FragmentScanBinding? = null
     private val binding get() = _binding!!
+    private var inputLocation : String = ""
 
     companion object {
         private const val TAG = "CameraFragment"
         private val REQUIRED_PERMISSIONS =
             mutableListOf (
-                Manifest.permission.CAMERA
-            ).apply {
-                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-                    add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                }
-            }.toTypedArray()
+                Manifest.permission.CAMERA,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ).toTypedArray()
     }
 
 
@@ -76,37 +93,26 @@ class ScanFragment : Fragment() {
                 createDialog(null)
             }
         }
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         return view
     }
 
+    @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         pickImage()
-        if (allPermissionsGranted()) {
+        if (cameraPermissionsGranted()) {
             Log.i("DEBUG", "permission granted")
             startCamera()
             binding.snapButton.setOnClickListener {
                 captureImage()
             }
+            getLocation()
         } else {
-            val requestPermissionLauncher = registerForActivityResult(
-                ActivityResultContracts.RequestPermission()
-            ) { isGranted ->
-                if (isGranted) {
-                    Log.i("DEBUG", "permission granted")
-                    startCamera()
-                    binding.snapButton.setOnClickListener {
-                        captureImage()
-                    }
-                } else {
-                    Toast.makeText(requireContext(), "Camera permission is not granted.", Toast.LENGTH_SHORT).show()
-                    binding.snapButton.isClickable = false
-                    binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
-
-                }
-            }
-            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+            requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+            getLocation()
         }
     }
 
@@ -117,19 +123,19 @@ class ScanFragment : Fragment() {
         requireActivity().registerReceiver(networkReceiver, IntentFilter("NETWORK_STATUS"))
 
         networkReceiver.setConnectedHandler {
-            Log.e(TAG, "Connected Handler")
-            binding.snapButton.isClickable = true
-            binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E0F806"))
-            binding.uploadButton.isClickable = true
-            binding.uploadButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E0F806"))
+//            Log.e(TAG, "Connected Handler")
+//            binding.snapButton.isClickable = true
+//            binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E0F806"))
+//            binding.uploadButton.isClickable = true
+//            binding.uploadButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E0F806"))
 
         }
         networkReceiver.setDisconnectedHandler {
-            Log.e(TAG, "Diconnected Handler")
-            binding.snapButton.isClickable = false
-            binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
-            binding.uploadButton.isClickable = false
-            binding.uploadButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
+//            Log.e(TAG, "Diconnected Handler")
+//            binding.snapButton.isClickable = false
+//            binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
+//            binding.uploadButton.isClickable = false
+//            binding.uploadButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
         }
     }
 
@@ -138,12 +144,15 @@ class ScanFragment : Fragment() {
         requireActivity().unregisterReceiver(networkReceiver)
     }
 
-    private fun allPermissionsGranted() : Boolean =
-        REQUIRED_PERMISSIONS.all {
-            ContextCompat.checkSelfPermission(
-                requireContext(), it
-            ) == PackageManager.PERMISSION_GRANTED
-        }
+    private fun cameraPermissionsGranted() : Boolean =
+        ContextCompat.checkSelfPermission(
+            requireContext(), Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+
+    private fun locationPermissionsGranted() : Boolean =
+        ContextCompat.checkSelfPermission(
+            requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
 
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
@@ -152,6 +161,73 @@ class ScanFragment : Fragment() {
             bindCameraUseCases()
         }, ContextCompat.getMainExecutor(requireContext()))
     }
+
+    val requestCameraPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            Log.i("DEBUG", "permission granted")
+            startCamera()
+            binding.snapButton.setOnClickListener {
+                captureImage()
+            }
+        } else {
+            Toast.makeText(requireContext(), "Camera permission is not granted.", Toast.LENGTH_SHORT).show()
+            binding.snapButton.isClickable = false
+            binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
+        }
+        requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+
+    val requestLocationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            getLocation()
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    fun getLocation() {
+        Log.e(TAG, locationPermissionsGranted().toString())
+        if (locationPermissionsGranted()) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    val lat = location.latitude
+                    val lon = location.longitude
+                    inputLocation = "($lat, $lon)"
+                    Log.i("Location scan", "Current Location: $lat, $lon")
+                } else {
+                    Log.i("Location scan", "Null location")
+                    val locationCallback = object : LocationCallback() {
+                        override fun onLocationResult(p0: LocationResult) {
+                            if (p0.locations.isNotEmpty()) {
+                                val newLocation = p0.locations[0]
+                                val lat = newLocation.latitude
+                                val lon = newLocation.longitude
+                                inputLocation = "($lat, $lon)"
+                                Log.i("Location scan", "Current Location: $lat, $lon")
+                            }
+                        }
+                    }
+
+                    val locationRequest = LocationRequest.Builder(
+                        Priority.PRIORITY_HIGH_ACCURACY,
+                        0
+                    ).build()
+
+                    fusedLocationClient.requestLocationUpdates(
+                        locationRequest,
+                        locationCallback,
+                        null
+                    )
+                }
+            }.addOnFailureListener { exception ->
+                Log.i("Location Button", exception.message.toString())
+            }
+        }
+    }
+
 
     private fun bindCameraUseCases() {
         val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
@@ -226,6 +302,9 @@ class ScanFragment : Fragment() {
         val posBtnBuilder = StringBuilder()
         val negBtnBuilder = StringBuilder()
 
+        val transactionName = StringBuilder()
+        var itemAmount : Double = 0.0
+
         if (billItems != null) {
             titleBuilder.append("Scanned Transactions")
             messageBuilder.append("Do you want to save this transactions?\n\n")
@@ -237,6 +316,12 @@ class ScanFragment : Fragment() {
                 messageBuilder.append("• Name: ${item.name}\n")
                 messageBuilder.append("• Price: ${item.price}\n")
                 messageBuilder.append("• Quantity: ${item.qty}\n\n")
+
+                transactionName.append(item.name)
+                if (index !== billItems.items.size - 1) {
+                    transactionName.append(" - ")
+                }
+                itemAmount += item.qty * item.price
             }
         } else {
             titleBuilder.append("An Error Occurred")
@@ -250,7 +335,18 @@ class ScanFragment : Fragment() {
             .setMessage(messageBuilder.toString())
             .setTitle(titleBuilder.toString())
             .setPositiveButton(posBtnBuilder.toString()) { dialog, which ->
-                // Do something.
+                if (billItems != null) {
+                    val newTransaction = Transaction(
+                        name = transactionName.toString(),
+                        amount = itemAmount.toInt(),
+                        location = inputLocation,
+                        category = "Pengeluaran"
+                    )
+                    lifecycleScope.launch {
+                        transactionRepository.insertTransaction(newTransaction)
+                    }
+                }
+
                 dialog.dismiss()
             }
             .setNegativeButton(negBtnBuilder.toString()) { dialog, which ->
