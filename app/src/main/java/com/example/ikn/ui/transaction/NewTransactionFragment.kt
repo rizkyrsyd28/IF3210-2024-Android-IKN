@@ -1,5 +1,7 @@
 package com.example.ikn.ui.transaction
 
+import android.app.UiModeManager
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.Editable
@@ -51,9 +53,9 @@ class NewTransactionFragment : Fragment() {
                 // Precise granted
             }
 
-            permission.getOrDefault(android.Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                // Precise granted
-            }
+//            permission.getOrDefault(android.Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
+//                // Precise granted
+//            }
 
             else -> {
                 // No permission granted
@@ -79,14 +81,31 @@ class NewTransactionFragment : Fragment() {
 
         val rootView = inflater.inflate(R.layout.fragment_new_transaction, container, false)
 
-        val textIdleColor = ContextCompat.getColor(
-            requireContext(),
-            R.color.md_theme_light_onTertiaryContainer
-        )
-        val textFocusColor = ContextCompat.getColor(
-            requireContext(),
-            R.color.md_theme_light_onPrimary
-        )
+        val uiModeManager =
+            requireContext().getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
+
+        val textIdleColor = if (uiModeManager.nightMode == UiModeManager.MODE_NIGHT_YES) {
+            ContextCompat.getColor(
+                requireContext(),
+                R.color.md_theme_dark_onSurface
+            )
+        } else {
+            ContextCompat.getColor(
+                requireContext(),
+                R.color.md_theme_light_onTertiaryContainer
+            )
+        }
+        val textFocusColor = if (uiModeManager.nightMode == UiModeManager.MODE_NIGHT_YES) {
+            ContextCompat.getColor(
+                requireContext(),
+                R.color.md_theme_dark_onBackground
+            )
+        } else {
+            ContextCompat.getColor(
+                requireContext(),
+                R.color.md_theme_light_onBackground
+            )
+        }
 
         val categories = TransactionCategory.entries.toTypedArray()
         val autoCompleteTextView =
@@ -96,6 +115,8 @@ class NewTransactionFragment : Fragment() {
         autoCompleteTextView.setAdapter(adapterItems)
 
         autoCompleteTextView.hint = "Category"
+
+        autoCompleteTextView.setTextColor(textIdleColor)
 
         autoCompleteTextView.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (hasFocus && autoCompleteTextView.text.isEmpty()) {
@@ -108,87 +129,14 @@ class NewTransactionFragment : Fragment() {
             }
         }
 
-        var itemSelected = false
-        autoCompleteTextView.setOnItemClickListener { parent, _, position, _ ->
-            val selectedTransactionCategory =
-                parent.getItemAtPosition(position) as TransactionCategory
-            autoCompleteTextView.setText(selectedTransactionCategory.toString())
-            itemSelected = true
-            autoCompleteTextView.hint = " "
-        }
-
         val etNameNewTransaction = rootView.findViewById<EditText>(R.id.etNameNewTransaction)
-
-        etNameNewTransaction.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // Not needed
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // Not needed
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                // Check if text is not empty
-                if (!s.isNullOrEmpty()) {
-                    // Change text color dynamically
-                    etNameNewTransaction.setTextColor(textFocusColor)
-                } else {
-                    // Set default text color when no text is entered
-                    etNameNewTransaction.setTextColor(textIdleColor)
-                    if (!itemSelected && !autoCompleteTextView.hasFocus()) {
-                        autoCompleteTextView.hint = "Category"
-                    }
-                }
-            }
-        })
-
         val etAmountNewTransaction = rootView.findViewById<EditText>(R.id.etAmountNewTransaction)
-
-        etAmountNewTransaction.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // Not needed
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // Not needed
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                // Check if text is not empty
-                if (!s.isNullOrEmpty()) {
-                    // Change text color dynamically
-                    etAmountNewTransaction.setTextColor(textFocusColor)
-                } else {
-                    // Set default text color when no text is entered
-                    etAmountNewTransaction.setTextColor(textIdleColor)
-                }
-            }
-        })
-
         val etLocationNewTransaction =
             rootView.findViewById<EditText>(R.id.etLocationNewTransaction)
 
-        etLocationNewTransaction.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // Not needed
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // Not needed
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                // Check if text is not empty
-                if (!s.isNullOrEmpty()) {
-                    // Change text color dynamically
-                    etLocationNewTransaction.setTextColor(textFocusColor)
-                } else {
-                    // Set default text color when no text is entered
-                    etLocationNewTransaction.setTextColor(textIdleColor)
-                }
-            }
-        })
+        etNameNewTransaction.setTextColor(textIdleColor)
+        etAmountNewTransaction.setTextColor(textIdleColor)
+        etLocationNewTransaction.setTextColor(textIdleColor)
 
         val saveButton = rootView.findViewById<Button>(R.id.btnSaveNewTransaction)
         saveButton.setOnClickListener {
@@ -210,6 +158,97 @@ class NewTransactionFragment : Fragment() {
             }
 
         }
+
+        fun updateSaveButtonState() {
+            val nameInput = etNameNewTransaction.text.toString()
+            val amountInput = etAmountNewTransaction.text.toString()
+            val locationInput = etLocationNewTransaction.text.toString()
+            val categoryInput = autoCompleteTextView.text.toString()
+
+            val isAnyFieldEmpty = nameInput.isBlank() || amountInput.isBlank() ||
+                    locationInput.isBlank() || categoryInput.isBlank()
+
+            saveButton.isEnabled = !isAnyFieldEmpty
+        }
+
+        var itemSelected = false
+        autoCompleteTextView.setOnItemClickListener { parent, _, position, _ ->
+            val selectedTransactionCategory =
+                parent.getItemAtPosition(position) as TransactionCategory
+            autoCompleteTextView.setText(selectedTransactionCategory.toString())
+            itemSelected = true
+            autoCompleteTextView.hint = " "
+            autoCompleteTextView.setTextColor(textFocusColor)
+            updateSaveButtonState()
+        }
+
+
+        etNameNewTransaction.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Not needed
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Not needed
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                // Check if text is not empty
+                if (!s.isNullOrEmpty()) {
+                    // Change text color dynamically
+                    etNameNewTransaction.setTextColor(textFocusColor)
+                } else {
+                    // Set default text color when no text is entered
+                    etNameNewTransaction.setTextColor(textIdleColor)
+                }
+                updateSaveButtonState()
+            }
+        })
+
+        etAmountNewTransaction.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Not needed
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Not needed
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                // Check if text is not empty
+                if (!s.isNullOrEmpty()) {
+                    // Change text color dynamically
+                    etAmountNewTransaction.setTextColor(textFocusColor)
+                } else {
+                    // Set default text color when no text is entered
+                    etAmountNewTransaction.setTextColor(textIdleColor)
+                }
+                updateSaveButtonState()
+            }
+        })
+
+
+        etLocationNewTransaction.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Not needed
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Not needed
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                // Check if text is not empty
+                if (!s.isNullOrEmpty()) {
+                    // Change text color dynamically
+                    etLocationNewTransaction.setTextColor(textFocusColor)
+                } else {
+                    // Set default text color when no text is entered
+                    etLocationNewTransaction.setTextColor(textIdleColor)
+                }
+                updateSaveButtonState()
+            }
+        })
 
         val getLocationButton = rootView.findViewById<Button>(R.id.btnGetLocationNewTransaction)
         getLocationButton.setOnClickListener {
@@ -237,6 +276,8 @@ class NewTransactionFragment : Fragment() {
                             Log.i("Location Button", "Current Location: $lat, $lon")
                         } else {
                             Log.i("Location Button", "Null location")
+
+
                             val locationCallback = object : LocationCallback() {
                                 override fun onLocationResult(p0: LocationResult) {
                                     if (p0.locations.isNotEmpty()) {
@@ -251,7 +292,7 @@ class NewTransactionFragment : Fragment() {
 
                             val locationRequest = LocationRequest.Builder(
                                 Priority.PRIORITY_HIGH_ACCURACY,
-                                0
+                                10000
                             ).build()
 
                             fusedLocationClient.requestLocationUpdates(
@@ -259,6 +300,7 @@ class NewTransactionFragment : Fragment() {
                                 locationCallback,
                                 null
                             )
+
                         }
                     }
                     .addOnFailureListener { exception ->
