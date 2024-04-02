@@ -19,7 +19,7 @@ import com.example.ikn.utils.SharedPreferencesManager
 import kotlinx.coroutines.launch
 
 class ScanViewModel(): ViewModel() {
-    private val bill: MutableLiveData<BillResponse?> = MutableLiveData()
+    var bill: MutableLiveData<BillResponse?> = MutableLiveData()
     private val repository = Repository()
 
     companion object {
@@ -56,15 +56,20 @@ class ScanViewModel(): ViewModel() {
             Log.e("TOKEN", token)
 
             var fetchedBill : BillResponse? = null
-            if (!token.isNullOrBlank()) {
+            if (token.isNotBlank()) {
                 val response = repository.postBill(file, token)
                 fetchedBill = response.body()
                 Log.e("PostBill", fetchedBill.toString())
             }
-            bill.value = fetchedBill;
+            bill.value = fetchedBill
         } catch (e: Exception) {
+            Log.e("ScanViewModel", e.toString())
+            bill.value = null
             e.printStackTrace()
         }
 
     }
+
+
+
 }

@@ -2,6 +2,7 @@ package com.example.ikn.ui.Settings
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -31,6 +32,7 @@ class SettingsFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
+//        requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         return binding.root
     }
 
@@ -69,6 +71,7 @@ class SettingsFragment : Fragment() {
                 val filepath = settingsViewModel.createExcel(this.transactionList, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).path, true)
                 openExcel(filepath)
                 binding.progressBarCyclic.visibility = View.GONE
+                dialog.dismiss()
             }
             .setNegativeButton(negBtn) { dialog, which ->
                 binding.progressBarCyclic.visibility = View.VISIBLE
@@ -76,6 +79,7 @@ class SettingsFragment : Fragment() {
                 val filepath = settingsViewModel.createExcel(this.transactionList, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).path, false)
                 openExcel(filepath)
                 binding.progressBarCyclic.visibility = View.GONE
+                dialog.dismiss()
             }
 
         val dialog: AlertDialog = builder.create()

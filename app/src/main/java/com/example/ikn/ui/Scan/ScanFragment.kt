@@ -1,14 +1,14 @@
 package com.example.ikn.ui.Scan
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -24,23 +24,21 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import com.example.ikn.databinding.FragmentScanBinding
 import com.example.ikn.model.response.item.Items
+import com.example.ikn.service.network.NetworkBroadcastReceiver
 
 
 class ScanFragment : Fragment() {
     private var cameraProvider: ProcessCameraProvider? = null
     private lateinit var imageCapture: ImageCapture
-    private lateinit var pickMedia: ActivityResultLauncher<PickVisualMediaRequest>;
+    private lateinit var pickMedia: ActivityResultLauncher<PickVisualMediaRequest>
     private lateinit var scanViewModel: ScanViewModel
-
-    private val PERMISSION_CAMERA_CODE = 9
-    private val PERMISSION_CAMERA = Manifest.permission.CAMERA
-
+    private lateinit var networkReceiver: NetworkBroadcastReceiver
 
     private var _binding: FragmentScanBinding? = null
     private val binding get() = _binding!!
@@ -56,6 +54,8 @@ class ScanFragment : Fragment() {
                 }
             }.toTypedArray()
     }
+
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -64,7 +64,9 @@ class ScanFragment : Fragment() {
         val view = binding.root
 
         scanViewModel = ViewModelProvider(this, ScanViewModelFactory())[ScanViewModel::class.java]
-        scanViewModel.getBill().observe(viewLifecycleOwner) { response ->
+        scanViewModel.bill = MutableLiveData()
+        scanViewModel.bill.observe(viewLifecycleOwner) { response ->
+            Log.e(TAG, response.toString())
             binding.progressBarCyclic.visibility = View.GONE
             if (response != null) {
                 createDialog(response.items)
@@ -72,6 +74,24 @@ class ScanFragment : Fragment() {
                 createDialog(null)
             }
         }
+        networkReceiver = NetworkBroadcastReceiver()
+//        requireActivity().network
+        requireActivity().registerReceiver(networkReceiver, IntentFilter("NETWORK_STATUS"))
+//        networkReceiver.setConnectedHandler {
+//            Log.e(TAG, "Connected Handler")
+//            binding.snapButton.isClickable = true
+//            binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E0F806"))
+//            binding.uploadButton.isClickable = true
+//            binding.uploadButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E0F806"))
+//
+//        }
+//        networkReceiver.setConnectedHandler {
+//            Log.e(TAG, "Diconnected Handler")
+//            binding.snapButton.isClickable = false
+//            binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
+//            binding.uploadButton.isClickable = false
+//            binding.uploadButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
+//        }
         return view
     }
 
@@ -163,8 +183,8 @@ class ScanFragment : Fragment() {
         })
     }
 
-    fun pickImage() {
-        pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+    private fun pickImage() {
+        pickMedia = registerForActivityResult(PickVisualMedia()) { uri ->
             if (uri != null) {
                 val file = kotlin.io.path.createTempFile().toFile()
                 uri.let { requireContext().contentResolver.openInputStream(it) }.use { input ->
@@ -219,9 +239,11 @@ class ScanFragment : Fragment() {
             .setTitle(titleBuilder.toString())
             .setPositiveButton(posBtnBuilder.toString()) { dialog, which ->
                 // Do something.
+                dialog.dismiss()
             }
             .setNegativeButton(negBtnBuilder.toString()) { dialog, which ->
                 // Do something else.
+                dialog.dismiss()
             }
 
         val dialog: AlertDialog = builder.create()
@@ -232,5 +254,6 @@ class ScanFragment : Fragment() {
         super.onDestroyView()
         cameraProvider?.unbindAll()
         _binding = null
+        scanViewModel.bill = MutableLiveData()
     }
 }
