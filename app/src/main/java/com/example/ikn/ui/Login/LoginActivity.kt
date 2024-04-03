@@ -13,7 +13,7 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
-        Log.i("[LOGIN]", "Create LoginActivity")
+        Log.i(TAG, "Start Create")
 
         setContentView(R.layout.activity_login)
 
@@ -22,19 +22,22 @@ class LoginActivity : AppCompatActivity() {
                 .replace(R.id.fragmentContainerView2, LoginFragment.newInstance())
                 .commit()
         }
+        Log.i(TAG, "Finish Create")
     }
 
     override fun onStart() {
         super.onStart()
-        Log.i("[LOGIN]", "Start LoginActivity")
+        Log.i(TAG, "Start Start")
     }
 
     override fun onResume() {
         super.onResume()
+        Log.w(TAG, "Start Resume")
         val service = (Intent(this, NetworkService::class.java))
         val tokenService = (Intent(this, TokenService::class.java))
         startService(service)
         startService(tokenService)
+        Log.w(TAG, "Finish Resume")
     }
 
     override fun onPause() {
@@ -44,6 +47,10 @@ class LoginActivity : AppCompatActivity() {
     }
     override fun onDestroy() {
         super.onDestroy()
-        Log.i("[LOGIN]", "Destroy LoginActivity config change $isChangingConfigurations, , finsih - $isFinishing")
+        Log.i(TAG, "Destroy LoginActivity config change $isChangingConfigurations, , finsih - $isFinishing")
+    }
+
+    companion object {
+        const val TAG = "[LOGIN ACTIVITY]"
     }
 }

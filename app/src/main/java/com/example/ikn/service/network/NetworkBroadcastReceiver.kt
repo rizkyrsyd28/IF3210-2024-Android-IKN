@@ -9,7 +9,7 @@ class NetworkBroadcastReceiver : BroadcastReceiver() {
     private var connectedHandler: () -> Unit = {
         Log.w(TAG, "this is default message from connected Handler")
     }
-    private var disconnectHandler: () -> Unit = {
+    private var disconnectedHandler: () -> Unit = {
         Log.w(TAG, "this is default message from disconnected Handler")
     }
 
@@ -17,14 +17,16 @@ class NetworkBroadcastReceiver : BroadcastReceiver() {
         connectedHandler = handler
     }
     fun setDisconnectedHandler(handler: () -> Unit) {
-        connectedHandler = handler
+        disconnectedHandler = handler
     }
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != ACTION && intent.extras?.isEmpty!!) return
 
         val status = intent.extras?.getBoolean(EXTRAS_KEY)!!
 
-        if (status) connectedHandler() else disconnectHandler()
+        Log.w(TAG, "Broadcast Network Receive Network Status = $status")
+
+        if (status) connectedHandler() else disconnectedHandler()
     }
 
     companion object {

@@ -39,8 +39,8 @@ class MainActivity : AppCompatActivity() {
         networkReceiver = NetworkBroadcastReceiver()
         registerReceiver(networkReceiver, IntentFilter("NETWORK_STATUS"))
 
-//        networkReceiver.setConnectedHandler { Log.e("network handler main", "connected") }
-//        networkReceiver.setDisconnectedHandler { Log.e("network handler main", "disconnected") }
+        networkReceiver.setConnectedHandler { Log.e(TAG, "connected") }
+        networkReceiver.setDisconnectedHandler { Log.e(TAG, "disconnected") }
 
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -103,5 +103,9 @@ class MainActivity : AppCompatActivity() {
         runOnUiThread {
             Toast.makeText(this, message, Toast.LENGTH_SHORT, ).show()
         }
+    }
+
+    companion object {
+        const val TAG = "[MAIN]"
     }
 }

@@ -46,12 +46,14 @@ class LoginFragment: Fragment() {
         val viewModel = LoginViewModel(repo, prefRepo)
 
         /* Check isi Shared Pref */
-        Log.i("[LOGIN]", "isKeep ${prefRepo.isKeepLoggedIn()}, email ${prefRepo.getSignInInfo().first} ${prefRepo.getSignInInfo().first}")
+        Log.i(TAG, "isKeep ${prefRepo.isKeepLoggedIn()}, email ${prefRepo.getSignInInfo().first} ${prefRepo.getSignInInfo().first}")
 
         if (viewModel.isAllowKeepLoggedIn()) {
             startActivity(Intent(activity, MainActivity::class.java))
             activity?.finish()
         }
+
+        Log.w(TAG, "After Call VM")
 
         signInBtn.setOnClickListener {
             Log.i("[LOGIN LISTENER]", "In Login Listener")
@@ -122,6 +124,7 @@ class LoginFragment: Fragment() {
     }
     companion object {
         fun newInstance() = LoginFragment()
+        const val TAG = "[LOGIN FRAGMENT]"
     }
 
 }

@@ -31,6 +31,7 @@ class NetworkManager(private val connectivityManager: ConnectivityManager) {
             }
             override fun onLost(network: Network) {
                 super.onLost(network)
+//                Log.e(TAG, "The application no longer has a default network. The last default network was $network")
                 Log.d(TAG, "Network Lost")
                 disconnectedBroadcast();
             }
@@ -48,5 +49,5 @@ class NetworkManager(private val connectivityManager: ConnectivityManager) {
                 networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
-    private val TAG = "[NET SERVICE]"
+    private val TAG = "[NETWORK MANAGER]"
 }

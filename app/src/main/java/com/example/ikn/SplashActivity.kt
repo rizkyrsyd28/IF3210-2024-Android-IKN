@@ -15,6 +15,8 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
+        Log.e(TAG, "Create Splash")
+
         supportActionBar?.hide()
 
         Handler(Looper.getMainLooper()).postDelayed(
@@ -24,21 +26,7 @@ class SplashActivity : AppCompatActivity() {
             }
         , 3000)
     }
-
-    override fun onResume() {
-        super.onResume()
-        val tokenService = (Intent(this, TokenService::class.java))
-        startService(tokenService)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        stopService(Intent(this, TokenService::class.java))
-        Log.w("[SPLASH]", "Splash Stop Config - $isChangingConfigurations, finsih - $isFinishing")
-
-    }
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.w("[SPLASH]", "Splash Destroy Config - $isChangingConfigurations, finsih - $isFinishing")
+    companion object {
+        const val TAG = "[SPLASH]"
     }
 }

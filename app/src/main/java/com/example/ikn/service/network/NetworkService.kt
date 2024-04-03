@@ -46,13 +46,13 @@ class NetworkService : Service() {
         return null
     }
     private fun sendNetworkStatus(isConnected: Boolean) {
-        Log.d(TAG, "Send Data 'isConnected' = $isConnected ")
-
         val intent = Intent("NETWORK_STATUS").apply {
             putExtra("status", isConnected)
         }
         sendBroadcast(intent)
     }
 
-    private val TAG = "[SERVICE]"
+    companion object {
+        const val TAG = "[NETWORK SERVICE]"
+    }
 }

@@ -52,21 +52,25 @@ class LoginViewModel(private val repo: Repository, private val prefRepo: Prefere
         }
     }
     fun isAllowKeepLoggedIn(): Boolean {
-        val isKeepLoggedIn = prefRepo.isKeepLoggedIn()
-        val signInInfo = prefRepo.getSignInInfo()
+        try {
+            val isKeepLoggedIn = prefRepo.isKeepLoggedIn()
+            val signInInfo = prefRepo.getSignInInfo()
 
-        if (!isKeepLoggedIn) return false
-        if (signInInfo.first == "" && signInInfo.second == "") return false
+            if (!isKeepLoggedIn) return false
+            if (signInInfo.first == "" && signInInfo.second == "") return false
 
-        var result = false
-        runBlocking {
-            val resToken: Response<TokenResponse> = repo.postToken(prefRepo.getToken())
-            result = resToken.isSuccessful
-            Log.w("[VIEW MODEL LOGIN]", "Hasil IN SCOPE - $result")
+            var result = false
+            runBlocking {
+                val resToken: Response<TokenResponse> = repo.postToken(prefRepo.getToken())
+                result = resToken.isSuccessful
+                Log.w("[VIEW MODEL LOGIN]", "Hasil IN SCOPE - $result")
+            }
+
+            Log.w("[VIEW MODEL LOGIN]", "Hasil - $result")
+            return result
+        } catch (exp: Exception) {
+            throw Exception(exp.message)
         }
-
-        Log.w("[VIEW MODEL LOGIN]", "Hasil - $result")
-        return result
     }
 
 }
