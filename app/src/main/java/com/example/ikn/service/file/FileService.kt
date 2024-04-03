@@ -150,6 +150,7 @@ class FileService(): Service() {
         }
         sendBroadcast(intent)
     }
+    /* TODO: Bikinin Get All untuk Transaction (ZAKI) */
     private fun getTransactions(): List<Transaction> {
         return listOf(
             Transaction(
