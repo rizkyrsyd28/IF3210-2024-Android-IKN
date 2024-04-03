@@ -37,5 +37,13 @@ class PreferenceRepository (private val prefManager: SharedPreferencesManager) {
         const val tokenKey = "TOKEN_VAL"
         const val emailKey = "EMAIL_INFO"
         const val passwordKey = "PASSWORD_INFO"
+
+        @Volatile
+        private var instance: PreferenceRepository? = null
+        fun getInstance(preference: SharedPreferencesManager): PreferenceRepository {
+            return instance ?: synchronized(this) {
+                instance ?: PreferenceRepository(preference).also { instance = it }
+            }
+        }
     }
 }

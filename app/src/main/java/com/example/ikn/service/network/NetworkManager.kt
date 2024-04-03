@@ -1,12 +1,10 @@
 package com.example.ikn.service.network
 
-import android.annotation.SuppressLint
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import android.os.Build
 import android.util.Log
 
 class NetworkManager(private val connectivityManager: ConnectivityManager) {
@@ -31,7 +29,6 @@ class NetworkManager(private val connectivityManager: ConnectivityManager) {
             }
             override fun onLost(network: Network) {
                 super.onLost(network)
-//                Log.e(TAG, "The application no longer has a default network. The last default network was $network")
                 Log.d(TAG, "Network Lost")
                 disconnectedBroadcast();
             }

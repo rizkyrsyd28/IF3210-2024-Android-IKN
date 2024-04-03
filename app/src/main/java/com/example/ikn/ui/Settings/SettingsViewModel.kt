@@ -44,6 +44,7 @@ class SettingsViewModel(transactionRepository: TransactionRepository, private va
         }
     }
 
+    @Deprecated("Create file di handle oleh service, lihat pada service FileService")
     fun createExcel(transactions : List<Transaction>?, path: String, isXlsx: Boolean) : String {
         if (transactions == null) return "";
 

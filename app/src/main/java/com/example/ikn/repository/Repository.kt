@@ -14,12 +14,19 @@ class Repository {
     suspend fun postBill(file: File, token: String): Response<BillResponse> {
         return HttpClient.billInstance.post(Converter.FileToMultipart(file), "Bearer $token")
     }
-
     suspend fun postLogin(email: String, password: String): Response<LoginResponse> {
         return HttpClient.authInstance.postLogin(LoginRequest(email, password))
     }
-
     suspend fun postToken(token: String): Response<TokenResponse> {
         return HttpClient.authInstance.postToken("Bearer $token")
+    }
+    companion object {
+        @Volatile
+        private var instance: Repository? = null
+        fun getInstance(): Repository {
+            return instance ?: synchronized(this) {
+                instance ?: Repository().also { instance = it }
+            }
+        }
     }
 }

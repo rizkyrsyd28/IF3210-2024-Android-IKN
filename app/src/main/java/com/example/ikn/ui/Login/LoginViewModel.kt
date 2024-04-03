@@ -1,13 +1,16 @@
 package com.example.ikn.ui.Login
 
 import android.app.Activity
+import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.ikn.model.response.LoginResponse
 import com.example.ikn.model.response.TokenResponse
 import com.example.ikn.repository.PreferenceRepository
@@ -59,18 +62,34 @@ class LoginViewModel(private val repo: Repository, private val prefRepo: Prefere
             if (!isKeepLoggedIn) return false
             if (signInInfo.first == "" && signInInfo.second == "") return false
 
-            var result = false
-            runBlocking {
-                val resToken: Response<TokenResponse> = repo.postToken(prefRepo.getToken())
-                result = resToken.isSuccessful
-                Log.w("[VIEW MODEL LOGIN]", "Hasil IN SCOPE - $result")
-            }
+//            var result: Boolean
+//            runBlocking {
+//                val resToken: Response<TokenResponse> = repo.postToken(prefRepo.getToken())
+//                result = resToken.isSuccessful
+//                Log.w("[VIEW MODEL LOGIN]", "Hasil IN SCOPE - $result")
+//            }
+            return true
 
-            Log.w("[VIEW MODEL LOGIN]", "Hasil - $result")
-            return result
         } catch (exp: Exception) {
-            throw Exception(exp.message)
+            Log.e(TAG, "exception \n${exp.message}")
+            return false
         }
     }
 
+    companion object {
+        const val TAG = "[LOGIN VIEW MODEL]"
+
+        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T: ViewModel> create (
+                modelClass: Class<T>,
+                extras: CreationExtras
+            ): T {
+                val applicationContext = checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as? Context)
+                return LoginViewModel(
+                    Repository.getInstance(),
+                    PreferenceRepository.getInstance(SharedPreferencesManager(applicationContext))) as T
+            }
+        }
+    }
 }

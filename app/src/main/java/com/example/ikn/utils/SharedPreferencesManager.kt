@@ -6,6 +6,13 @@ import android.content.SharedPreferences
 class SharedPreferencesManager (context: Context) {
     companion object {
         const val NAME_PREF = "IKN_PREF"
+
+        @Volatile private var instance: SharedPreferencesManager? = null // Volatile modifier is necessary
+
+        fun getInstance(context: Context) =
+            instance ?: synchronized(this) {
+                instance ?: SharedPreferencesManager(context).also { instance = it }
+            }
     }
 
     private val sharedPreferences : SharedPreferences

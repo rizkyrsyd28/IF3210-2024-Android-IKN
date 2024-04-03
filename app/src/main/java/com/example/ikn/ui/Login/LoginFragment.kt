@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import com.example.ikn.MainActivity
 import com.example.ikn.databinding.FragmentLoginBinding
@@ -30,6 +31,8 @@ class LoginFragment: Fragment() {
     private lateinit var receiver : BroadcastReceiver
     private lateinit var signInBtn: Button
 
+    private val loginViewModel: LoginViewModel by viewModels { LoginViewModel.Factory }
+
     private val emailRegex = Regex("[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,}")
 
     override fun onCreateView(
@@ -40,20 +43,10 @@ class LoginFragment: Fragment() {
         binding = FragmentLoginBinding.inflate(inflater, container, false)
         signInBtn = binding.signInButton
 
-        val sharedPref = SharedPreferencesManager(requireContext())
-        val repo = Repository()
-        val prefRepo = PreferenceRepository(sharedPref)
-        val viewModel = LoginViewModel(repo, prefRepo)
-
-        /* Check isi Shared Pref */
-        Log.i(TAG, "isKeep ${prefRepo.isKeepLoggedIn()}, email ${prefRepo.getSignInInfo().first} ${prefRepo.getSignInInfo().first}")
-
-        if (viewModel.isAllowKeepLoggedIn()) {
+        if (loginViewModel.isAllowKeepLoggedIn()) {
             startActivity(Intent(activity, MainActivity::class.java))
             activity?.finish()
         }
-
-        Log.w(TAG, "After Call VM")
 
         signInBtn.setOnClickListener {
             Log.i("[LOGIN LISTENER]", "In Login Listener")
@@ -61,11 +54,11 @@ class LoginFragment: Fragment() {
                 email = binding.emailEditText.text.toString(),
                 password = binding.passwordEditText.text.toString(),
                 isKeepLoggedIn = binding.checkBox.isChecked,
-                viewModel
+                loginViewModel
                 )
         }
 
-        viewModel.authorized.observe(viewLifecycleOwner, Observer { token ->
+        loginViewModel.authorized.observe(viewLifecycleOwner, Observer { token ->
             if (token) {
                    Handler(Looper.getMainLooper()).postDelayed(
                        {
@@ -76,9 +69,9 @@ class LoginFragment: Fragment() {
             }
         })
 
-        viewModel.failed.observe(viewLifecycleOwner, Observer { error ->
+        loginViewModel.failed.observe(viewLifecycleOwner, Observer { error ->
             if (error) {
-                showToast(viewModel.failedMessage)
+                showToast(loginViewModel.failedMessage)
             }
         })
 
@@ -108,11 +101,10 @@ class LoginFragment: Fragment() {
     private fun signInHandler(email: String, password: String, isKeepLoggedIn: Boolean, viewModel: LoginViewModel) {
         try {
             if (!validateSignIn(email, password)) {
-//            Toast.makeText(requireActivity(), "Email or Password Invalid", Toast.LENGTH_SHORT, ).show()
                 showToast("Email or Password Invalid")
                 return
             }
-            viewModel.signInHandler(email, password, isKeepLoggedIn)
+            loginViewModel.signInHandler(email, password, isKeepLoggedIn)
         } catch (exp: Exception) {
             showToast("Failed to Sign In")
         }

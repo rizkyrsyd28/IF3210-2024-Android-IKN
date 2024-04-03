@@ -5,6 +5,7 @@
     <uses-feature
         android:name="android.hardware.camera.any"
         android:required="true" />
+
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -22,6 +23,12 @@
         android:supportsRtl="true"
         android:theme="@style/Base.Theme.IKN"
         tools:targetApi="31">
+
+        <!--    RECEIVER    -->
+        <receiver
+            android:name=".service.file.FileBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false"/>
         <receiver
             android:name=".service.network.NetworkBroadcastReceiver"
             android:enabled="true"
@@ -31,6 +38,7 @@
             android:enabled="true"
             android:exported="false" />
 
+        <!--     SERVICE    -->
         <service
             android:name=".service.network.NetworkService"
             android:enabled="true"
@@ -39,22 +47,28 @@
             android:name=".service.token.TokenService"
             android:enabled="true"
             android:exported="false"/>
+        <service
+            android:name=".service.file.FileService"
+            android:enabled="true"
+            android:exported="false" />
 
+        <!--    ACTIVITY     -->
         <activity
             android:name=".SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".ui.Login.LoginActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
-            android:exported="false"/>
+            android:exported="false" />
+
+        <!--    CONTENT PROVIDER    -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.ikn.fileprovider"
@@ -62,7 +76,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                android:resource="@xml/provider_paths" />
         </provider>
     </application>
 
