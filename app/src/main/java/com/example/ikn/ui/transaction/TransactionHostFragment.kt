@@ -94,6 +94,7 @@ class TransactionHostFragment : Fragment() {
             "Back stack entry count: ${childFragmentManager.backStackEntryCount}"
         )
         childFragmentManager.restoreBackStack("new_transaction")
+        childFragmentManager.restoreBackStack("update_transaction")
     }
 
     override fun onDestroy() {
