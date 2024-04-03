@@ -1,6 +1,7 @@
 package com.example.ikn.ui.transaction
 
 import android.app.UiModeManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -22,6 +23,7 @@ import com.example.ikn.data.AppDatabase
 import com.example.ikn.data.TransactionCategory
 import com.example.ikn.data.TransactionRepository
 import com.example.ikn.repository.PreferenceRepository
+import com.example.ikn.utils.RandomGenerator
 import com.example.ikn.utils.SharedPreferencesManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -31,12 +33,15 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import kotlinx.coroutines.launch
 
+private const val ARG_SHOULD_RANDOM = "should_random"
+
 /**
  * A simple [Fragment] subclass.
  * Use the [NewTransactionFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
 class NewTransactionFragment : Fragment() {
+    private var shouldRandom: Boolean? = null
 
     private val transactionRepository: TransactionRepository by lazy {
         TransactionRepository.getInstance(
@@ -69,7 +74,7 @@ class NewTransactionFragment : Fragment() {
         super.onCreate(savedInstanceState)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         arguments?.let {
-
+            shouldRandom = it.getBoolean(ARG_SHOULD_RANDOM)
         }
     }
 
@@ -107,9 +112,9 @@ class NewTransactionFragment : Fragment() {
             )
         }
 
-        val categories = TransactionCategory.entries.toTypedArray()
         val autoCompleteTextView =
             rootView.findViewById<AutoCompleteTextView>(R.id.autoCategoryNewTransaction)
+        val categories = TransactionCategory.entries.toTypedArray()
         val adapterItems =
             TransactionCategoryAdapter(requireContext(), R.layout.item_dropdown, categories)
         autoCompleteTextView.setAdapter(adapterItems)
@@ -133,21 +138,36 @@ class NewTransactionFragment : Fragment() {
         val etAmountNewTransaction = rootView.findViewById<EditText>(R.id.etAmountNewTransaction)
         val etLocationNewTransaction =
             rootView.findViewById<EditText>(R.id.etLocationNewTransaction)
-
-        etNameNewTransaction.setTextColor(textIdleColor)
-        etAmountNewTransaction.setTextColor(textIdleColor)
-        etLocationNewTransaction.setTextColor(textIdleColor)
-
         val saveButton = rootView.findViewById<Button>(R.id.btnSaveNewTransaction)
+
+        if (shouldRandom == true) {
+            val randomGenerator = RandomGenerator()
+            etAmountNewTransaction.setText(randomGenerator.getAmount().toString())
+            etLocationNewTransaction.setText(randomGenerator.getLocation())
+
+            etAmountNewTransaction.setTextColor(textFocusColor)
+            etLocationNewTransaction.setTextColor(textFocusColor)
+        }
+
+        var nameInput = etNameNewTransaction.text.toString()
+        var amountInput = etAmountNewTransaction.text.toString()
+        var locationInput = etLocationNewTransaction.text.toString()
+        var categoryInput = autoCompleteTextView.text.toString()
+
+
+        var isAnyFieldEmpty = nameInput.isBlank() || amountInput.isBlank() ||
+                locationInput.isBlank() || categoryInput.isBlank()
+
+        saveButton.isEnabled = !isAnyFieldEmpty
         saveButton.setOnClickListener {
 
-            val nameInput = etNameNewTransaction.text.toString()
-            val amountInput = etAmountNewTransaction.text.toString().toInt()
-            val locationInput = etLocationNewTransaction.text.toString()
+            nameInput = etNameNewTransaction.text.toString()
+            amountInput = etAmountNewTransaction.text.toString()
+            locationInput = etLocationNewTransaction.text.toString()
 
             val newTransaction = Transaction(
                 name = nameInput,
-                amount = amountInput,
+                amount = amountInput.toInt(),
                 location = locationInput,
                 category = autoCompleteTextView.text.toString()
             )
@@ -160,26 +180,31 @@ class NewTransactionFragment : Fragment() {
         }
 
         fun updateSaveButtonState() {
-            val nameInput = etNameNewTransaction.text.toString()
-            val amountInput = etAmountNewTransaction.text.toString()
-            val locationInput = etLocationNewTransaction.text.toString()
-            val categoryInput = autoCompleteTextView.text.toString()
+            nameInput = etNameNewTransaction.text.toString()
+            amountInput = etAmountNewTransaction.text.toString()
+            locationInput = etLocationNewTransaction.text.toString()
+            categoryInput = autoCompleteTextView.text.toString()
 
-            val isAnyFieldEmpty = nameInput.isBlank() || amountInput.isBlank() ||
+            isAnyFieldEmpty = nameInput.isBlank() || amountInput.isBlank() ||
                     locationInput.isBlank() || categoryInput.isBlank()
 
             saveButton.isEnabled = !isAnyFieldEmpty
         }
 
-        var itemSelected = false
+
+        var isItemSelected = false
         autoCompleteTextView.setOnItemClickListener { parent, _, position, _ ->
             val selectedTransactionCategory =
                 parent.getItemAtPosition(position) as TransactionCategory
             autoCompleteTextView.setText(selectedTransactionCategory.toString())
-            itemSelected = true
             autoCompleteTextView.hint = " "
+            isItemSelected = true
             autoCompleteTextView.setTextColor(textFocusColor)
             updateSaveButtonState()
+        }
+
+        if (isItemSelected) {
+            autoCompleteTextView.setTextColor(textFocusColor)
         }
 
 
@@ -310,19 +335,28 @@ class NewTransactionFragment : Fragment() {
 
         }
 
-        val email =
-            PreferenceRepository(SharedPreferencesManager(requireContext()))
-                .getSignInInfo()
-                .first
-
-        Log.d("SPM", "User email: $email")
 
         return rootView
     }
 
-    private fun generateField() {
+//    override fun onStop() {
+//        super.onStop()
+//        parentFragmentManager.saveBackStack("new_transaction")
+//        Log.d("TransactionFragmentManager", "Back stack entry count: ${parentFragmentManager.backStackEntryCount}")
+//    }
 
+    override fun onPause() {
+        super.onPause()
+        parentFragmentManager.saveBackStack("new_transaction")
+        Log.d("TransactionFragmentManager", "Back stack entry count: ${parentFragmentManager.backStackEntryCount}")
     }
+
+//    override fun onSaveInstanceState(outState: Bundle) {
+//        super.onSaveInstanceState(outState)
+//        parentFragmentManager.saveBackStack("new_transaction")
+//        Log.d("TransactionFragmentManager", "Back stack entry count: ${childFragmentManager.backStackEntryCount}")
+//    }
+
     companion object {
         /**
          * Use this factory method to create a new instance of
@@ -334,9 +368,10 @@ class NewTransactionFragment : Fragment() {
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        fun newInstance(shouldRandom: Boolean = false) =
             NewTransactionFragment().apply {
                 arguments = Bundle().apply {
+                    putBoolean(ARG_SHOULD_RANDOM, shouldRandom)
                 }
             }
     }
