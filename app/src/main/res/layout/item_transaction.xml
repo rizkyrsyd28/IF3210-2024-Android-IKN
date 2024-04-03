@@ -3,15 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/white"
     android:layout_marginTop="11dp"
     app:cardElevation="0dp"
+    app:cardBackgroundColor="?colorTertiary"
     app:cardCornerRadius="28dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
         android:padding="20dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -96,7 +95,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/urbanist_medium"
                 android:text="15.000"
-                android:textColor="?colorOnTertiaryContainer"
+                android:textColor="?colorOnTertiary"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/tvCurrency" />
@@ -114,7 +113,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="5dp"
-                android:fontFamily="@font/urbanist_italic"
+                android:fontFamily="@font/urbanist_regular"
                 android:text="Aero"
                 android:textColor="?colorOnTertiaryContainer"
                 android:textSize="11sp"
@@ -128,6 +127,7 @@
                 android:contentDescription="@string/pin_description"
                 android:src="@drawable/ic_location_pin"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:tint="?colorOnTertiaryContainer"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>

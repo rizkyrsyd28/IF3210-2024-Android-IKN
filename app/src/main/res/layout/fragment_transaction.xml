@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?colorSurface"
+    android:background="?android:colorBackground"
     android:paddingHorizontal="15dp"
     android:paddingTop="11dp"
     tools:context=".ui.transaction.TransactionFragment">
@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="11dp"
-        android:background="@color/white"
+        android:background="?android:colorBackground"
         app:cardCornerRadius="28dp"
         app:cardElevation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -90,7 +90,7 @@
         android:id="@+id/cvLatestTransaction"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?colorSecondaryContainer"
+        android:background="?android:colorBackground"
         app:layout_constraintTop_toBottomOf="@id/cvTotalTransaction"
         android:layout_marginTop="11dp"
         app:cardElevation="0dp"
@@ -117,7 +117,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/urbanist_light"
                     android:text="Latest Transaction"
-                    android:textColor="?colorOnTertiaryContainer"
+                    android:textColor="?colorOnSecondaryContainer"
                     android:textSize="11sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent" />
@@ -139,7 +139,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/urbanist_light"
                     android:text="9 Sep 2001"
-                    android:textColor="?colorOnTertiaryContainer"
+                    android:textColor="?colorOnSecondaryContainer"
                     android:textSize="11sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent" />
@@ -150,7 +150,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/urbanist_light"
                     android:text=" · "
-                    android:textColor="?colorOnTertiaryContainer"
+                    android:textColor="?colorOnSecondaryContainer"
                     android:textSize="11sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/tvDateLatest" />
@@ -223,9 +223,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="5dp"
-                    android:fontFamily="@font/urbanist_italic"
+                    android:fontFamily="@font/urbanist_regular"
                     android:text="Aero"
-                    android:textColor="?colorOnTertiaryContainer"
+                    android:textColor="?colorOnSecondaryContainer"
                     android:textSize="11sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/ivLocationPinLatest" />
@@ -239,7 +239,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:tint="?colorOnSecondary" />
+                    app:tint="?colorOnSecondaryContainer" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
@@ -250,8 +250,7 @@
         android:layout_height="0dp"
         android:layout_marginTop="5dp"
         app:layout_constraintTop_toBottomOf="@id/cvLatestTransaction"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:background="?colorSurface" />
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddTransaction"
@@ -260,12 +259,12 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:src="@drawable/ic_add"
-        app:tint="?colorOnSecondary"
+        app:tint="?colorOnSurfaceInverse"
         app:elevation="0dp"
         android:layout_marginBottom="20dp"
         android:layout_marginEnd="9dp"
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlayExtended"
-        android:backgroundTint="?colorSecondary"
+        android:backgroundTint="?colorSurfaceInverse"
         android:layout_gravity="bottom|end"
         android:contentDescription="@string/desc_floating_action_button_transaction" />
 </androidx.constraintlayout.widget.ConstraintLayout>

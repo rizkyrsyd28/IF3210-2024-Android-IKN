@@ -1,10 +1,13 @@
 package com.example.ikn.ui.transaction
 
 import android.annotation.SuppressLint
+import android.app.UiModeManager
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
 import android.text.TextWatcher
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +15,7 @@ import android.view.ViewGroup
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
@@ -72,37 +76,60 @@ class UpdateTransactionFragment : Fragment() {
         // Inflate the layout for this fragment
         val rootView = inflater.inflate(R.layout.fragment_update_transaction, container, false)
 
-        val textIdleColor = ContextCompat.getColor(requireContext(),
-            R.color.md_theme_light_onTertiaryContainer
-        )
-        val textFocusColor = ContextCompat.getColor(requireContext(),
-            R.color.md_theme_light_onPrimary
-        )
+        val uiModeManager =
+            requireContext().getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
+        val textIdleColor = if (uiModeManager.nightMode == UiModeManager.MODE_NIGHT_YES) {
+            ContextCompat.getColor(
+                requireContext(),
+                R.color.md_theme_dark_onTertiaryContainer
+            )
+        } else {
+            ContextCompat.getColor(
+                requireContext(),
+                R.color.md_theme_light_onTertiaryContainer
+            )
+        }
+        val textFocusColor = if (uiModeManager.nightMode == UiModeManager.MODE_NIGHT_YES) {
+            ContextCompat.getColor(
+                requireContext(),
+                R.color.md_theme_dark_onBackground
+            )
+        } else {
+            ContextCompat.getColor(
+                requireContext(),
+                R.color.md_theme_light_onBackground
+            )
+        }
 
         val nameEditText = rootView.findViewById<EditText>(R.id.etNameNewTransaction)
-        nameEditText.setText(transactionName)
-
         val amountEditText = rootView.findViewById<EditText>(R.id.etAmountNewTransaction)
+        val autoCompleteTextView = rootView.findViewById<EditText>(R.id.autoCategoryNewTransaction)
+        val locationEditText = rootView.findViewById<EditText>(R.id.etLocationNewTransaction)
+        val date = rootView.findViewById<EditText>(R.id.etDateNewTransaction)
+
+        nameEditText.setTextColor(textFocusColor)
+        amountEditText.setTextColor(textFocusColor)
+        autoCompleteTextView.setTextColor(textIdleColor)
+        date.setTextColor(textFocusColor)
+
+        nameEditText.setText(transactionName)
         amountEditText.setText(transactionAmount.toString())
+        autoCompleteTextView.setText(transactionCategory)
+        locationEditText.setText(transactionLocation)
 
         // Set location and category to be un-clickable
-        val autoCompleteTextView = rootView.findViewById<AutoCompleteTextView>(R.id.autoCategoryNewTransaction)
         autoCompleteTextView.isEnabled = false
         autoCompleteTextView.isClickable = false
         autoCompleteTextView.isFocusable = false
-        autoCompleteTextView.setText(transactionCategory)
 
-        val locationEditText = rootView.findViewById<EditText>(R.id.etLocationNewTransaction)
         locationEditText.isEnabled = false
         locationEditText.isClickable = false
         locationEditText.isFocusable = false
-        locationEditText.setText(transactionLocation)
 
         val recyclerViewFormat = SimpleDateFormat("dd MMM yyy", Locale.US)
         val formFormat = SimpleDateFormat("dd/MM/yyyy")
         val dateString = recyclerViewFormat.parse(transactionDate!!)?.let { formFormat.format(it) }
         val dateMaxLength = 10
-        val date = rootView.findViewById<EditText>(R.id.etDateNewTransaction)
         val dateFilters = arrayOf<InputFilter>(InputFilter.LengthFilter(dateMaxLength))
         date.setText(dateString)
         date.filters = dateFilters
@@ -129,6 +156,46 @@ class UpdateTransactionFragment : Fragment() {
             }
         }
 
+        nameEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Not needed
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Not needed
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                // Check if text is not empty
+                if (!s.isNullOrEmpty()) {
+                    // Change text color dynamically
+                    nameEditText.setTextColor(textFocusColor)
+                } else {
+                    // Set default text color when no text is entered
+                    nameEditText.setTextColor(textIdleColor)
+                }
+            }
+        })
+        amountEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Not needed
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Not needed
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                // Check if text is not empty
+                if (!s.isNullOrEmpty()) {
+                    // Change text color dynamically
+                    amountEditText.setTextColor(textFocusColor)
+                } else {
+                    // Set default text color when no text is entered
+                    amountEditText.setTextColor(textIdleColor)
+                }
+            }
+        })
         date.addTextChangedListener(object : TextWatcher {
 
             private var currentLength = 0
@@ -179,6 +246,12 @@ class UpdateTransactionFragment : Fragment() {
         return rootView
     }
 
+    override fun onPause() {
+        super.onPause()
+        parentFragmentManager.saveBackStack("update_transaction")
+        Log.d("TransactionFragmentManager", "Back stack entry count: ${parentFragmentManager.backStackEntryCount}")
+    }
+
     private fun isValidDate(dateString: String?): Boolean {
         if (dateString.isNullOrEmpty()) return false
 
@@ -207,7 +280,6 @@ class UpdateTransactionFragment : Fragment() {
          * @param transactionCategory Parameter 1.
          * @return A new instance of fragment UpdateTransactionFragment.
          */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(
             transactionId: Int,

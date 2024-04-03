@@ -6,9 +6,11 @@ import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
+import android.view.ContextMenu
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -41,6 +43,13 @@ class SettingsFragment : Fragment() {
 
         settingsViewModel.transactions.observe(viewLifecycleOwner) { transactionList ->
             this.transactionList = transactionList
+        }
+
+        binding.btnSettingsRandomTransactions.setOnClickListener {
+            Intent().also { intent ->
+                intent.setAction("com.example.ikn.RANDOM_TRANSACTION")
+                requireActivity().sendBroadcast(intent)
+            }
         }
 
         binding.btnSettingsSavedTransactions.setOnClickListener {

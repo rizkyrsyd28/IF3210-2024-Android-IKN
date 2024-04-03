@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         unregisterReceiver(tokenReceiver)
         unregisterReceiver(networkReceiver)
-        Log.w("[MAIN]", "Main Destroy Config - $isChangingConfigurations, finsih - $isFinishing")
+        Log.w("[MAIN]", "Main Destroy Config - $isChangingConfigurations, finish - $isFinishing")
     }
 
     private fun showToast(message: String) {

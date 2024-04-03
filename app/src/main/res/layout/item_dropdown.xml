@@ -3,8 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="13dp"
-    android:background="?colorTertiaryContainer"
-    android:textColor="?colorOnPrimary"
+    android:background="?colorSurfaceVariant"
+    android:textColor="?colorOnSurfaceVariant"
     android:textSize="15sp" >
 
 </TextView>

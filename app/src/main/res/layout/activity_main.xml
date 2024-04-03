@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/broken_white"
+    android:background="?android:colorBackground"
     tools:context=".MainActivity">
 
     <TextView
@@ -17,7 +17,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:text="Transaction"
-        android:textColor="?colorSecondary"
+        android:textColor="?colorOnBackground"
         android:textSize="20sp" />
 
     <androidx.fragment.app.FragmentContainerView
