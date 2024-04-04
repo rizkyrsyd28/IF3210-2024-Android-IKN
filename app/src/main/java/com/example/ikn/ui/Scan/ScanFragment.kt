@@ -114,6 +114,21 @@ class ScanFragment : Fragment() {
             requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
             getLocation()
         }
+
+        var mainActivity = requireActivity() as MainActivity
+        if (mainActivity.isConnected) {
+            Log.e(TAG, "Connected from activity")
+            binding.snapButton.isClickable = true
+            binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E0F806"))
+            binding.uploadButton.isClickable = true
+            binding.uploadButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E0F806"))
+        } else {
+            Log.e(TAG, "Diconnected from activity")
+            binding.snapButton.isClickable = false
+            binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
+            binding.uploadButton.isClickable = false
+            binding.uploadButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
+        }
     }
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
@@ -123,19 +138,18 @@ class ScanFragment : Fragment() {
         requireActivity().registerReceiver(networkReceiver, IntentFilter("NETWORK_STATUS"))
 
         networkReceiver.setConnectedHandler {
-//            Log.e(TAG, "Connected Handler")
-//            binding.snapButton.isClickable = true
-//            binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E0F806"))
-//            binding.uploadButton.isClickable = true
-//            binding.uploadButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E0F806"))
-
+            Log.e(TAG, "Connected Handler")
+            binding.snapButton.isClickable = true
+            binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E0F806"))
+            binding.uploadButton.isClickable = true
+            binding.uploadButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E0F806"))
         }
         networkReceiver.setDisconnectedHandler {
-//            Log.e(TAG, "Diconnected Handler")
-//            binding.snapButton.isClickable = false
-//            binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
-//            binding.uploadButton.isClickable = false
-//            binding.uploadButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
+            Log.e(TAG, "Diconnected Handler")
+            binding.snapButton.isClickable = false
+            binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
+            binding.uploadButton.isClickable = false
+            binding.uploadButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
         }
     }
 

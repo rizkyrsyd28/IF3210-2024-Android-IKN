@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appDatabase: AppDatabase
     private lateinit var tokenReceiver: TokenBroadcastReceiver
     private lateinit var networkReceiver: NetworkBroadcastReceiver
+    var isConnected: Boolean = false
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,8 +40,14 @@ class MainActivity : AppCompatActivity() {
         networkReceiver = NetworkBroadcastReceiver()
         registerReceiver(networkReceiver, IntentFilter("NETWORK_STATUS"))
 
-        networkReceiver.setConnectedHandler { Log.e(TAG, "connected") }
-        networkReceiver.setDisconnectedHandler { Log.e(TAG, "disconnected") }
+        networkReceiver.setConnectedHandler {
+            Log.e(TAG, "connected");
+            isConnected = true
+        }
+        networkReceiver.setDisconnectedHandler {
+            Log.e(TAG, "disconnected")
+            isConnected = false
+        }
 
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
