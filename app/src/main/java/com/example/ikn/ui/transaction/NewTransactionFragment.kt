@@ -30,6 +30,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.Priority
 import kotlinx.coroutines.launch
 
@@ -50,11 +51,11 @@ class NewTransactionFragment : Fragment() {
     ) { permission ->
         when {
             permission.getOrDefault(android.Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                // Precise granted
+                Log.d("Location Permission [New Transaction]", "Fine permission granted")
             }
 
             permission.getOrDefault(android.Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                // Precise granted
+                Log.d("Location Permission [New Transaction]", "Coarse permission granted")
             }
 
             else -> {
@@ -296,6 +297,12 @@ class NewTransactionFragment : Fragment() {
                 )
             }
 
+            val locationRequest = LocationRequest.Builder(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                10000
+            ).build()
+
+
             if (fineLocationPermissionGranted) {
                 fusedLocationClient.lastLocation
                     .addOnSuccessListener { location ->
@@ -320,11 +327,6 @@ class NewTransactionFragment : Fragment() {
                                 }
                             }
 
-                            val locationRequest = LocationRequest.Builder(
-                                Priority.PRIORITY_HIGH_ACCURACY,
-                                10000
-                            ).build()
-
                             fusedLocationClient.requestLocationUpdates(
                                 locationRequest,
                                 locationCallback,
@@ -346,7 +348,10 @@ class NewTransactionFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         parentFragmentManager.saveBackStack("new_transaction")
-        Log.d("TransactionFragmentManager", "Back stack entry count: ${parentFragmentManager.backStackEntryCount}")
+        Log.d(
+            "TransactionFragmentManager",
+            "Back stack entry count: ${parentFragmentManager.backStackEntryCount}"
+        )
     }
 
     companion object {
