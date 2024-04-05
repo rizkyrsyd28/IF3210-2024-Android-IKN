@@ -107,6 +107,7 @@ class TransactionFragment() : Fragment(), TransactionAdapter.OnTransactionItemLo
         transactionViewModel.transactions.observe(viewLifecycleOwner) { transactionList ->
             transactionAdapter.submitList(transactionList)
             if (transactionList.isNotEmpty()) {
+                latestTransactionCardView.visibility = View.VISIBLE
                 tvTransactionNameLatest.text = transactionList[0].name
                 tvTransactionAmountLatest.text =
                     NumberFormat.getNumberInstance(Locale.US).format(transactionList[0].amount)
