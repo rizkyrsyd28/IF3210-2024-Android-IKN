@@ -54,6 +54,9 @@ class LoginViewModel(private val repo: Repository, private val prefRepo: Prefere
             Log.e("[VIEW MODEL LOGIN]", "Error - ${exp.message}")
         }
     }
+    fun signAsGuestHandler(email: String) {
+        prefRepo.setSignInInfo(email, "")
+    }
     fun isAllowKeepLoggedIn(): Boolean {
         try {
             Log.e(TAG, "View Model Keep Logged In Check")

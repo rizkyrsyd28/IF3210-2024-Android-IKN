@@ -48,6 +48,7 @@ class LoginFragment: Fragment() {
         asGuestBtn = binding.asGuestButton
 
         if (loginViewModel.isAllowKeepLoggedIn()) {
+            loginViewModel.signAsGuestHandler(email = binding.emailEditText.text.toString())
             startActivity(Intent(activity, MainActivity::class.java).apply {
                 putExtra("status", true)
             })
