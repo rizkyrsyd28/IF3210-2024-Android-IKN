@@ -1,6 +1,6 @@
 # Transaction Management Android App
 
-## Deskrripsi Aplikasi
+## Deskripsi Aplikasi
 
 Aplikasi Manajer Keuangan merupakan sebuah aplikasi yang dirancang untuk membantu pengguna dalam
 mengelola keuangan pribadi mereka. Dengan aplikasi ini, pengguna dapat mencatat transaksi keuangan,
