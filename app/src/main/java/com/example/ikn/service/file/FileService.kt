@@ -11,6 +11,7 @@ import com.example.ikn.ui.transaction.Transaction
 import com.example.ikn.utils.SharedPreferencesManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -65,7 +66,7 @@ class FileService(): Service() {
 
     private fun doWork(dir: String, isXlsx: Boolean, isSend: Boolean) {
         CoroutineScope(Dispatchers.IO).launch {
-            val transactions = getTransactions()
+            val transactions = async { getTransactions() }.await()
 
             if (transactions.isEmpty()) {
                 Log.w(TAG, "Transactions is Empty")
