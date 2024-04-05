@@ -12,6 +12,7 @@ import com.example.ikn.utils.SharedPreferencesManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.ss.usermodel.FillPatternType
@@ -150,34 +151,11 @@ class FileService(): Service() {
         }
         sendBroadcast(intent)
     }
-    /* TODO: Bikinin Get All untuk Transaction (ZAKI) */
-    private fun getTransactions(): List<Transaction> {
-        return listOf(
-            Transaction(
-                id = 1,
-                date = "01 Apr 2024",
-                category = "Pengeluaran",
-                name = "Kebab Bossman",
-                amount = 30000,
-                location = "Sekeloa"
-            ),
-            Transaction(
-                id = 5,
-                date = "01 Apr 2024",
-                category = "Pengeluaran",
-                name = "PS",
-                amount = 17500,
-                location = "Cisitu"
-            ),
-            Transaction(
-                id = 8,
-                date = "01 Apr 2024",
-                category = "Pengeluaran",
-                name = "Futsal",
-                amount = 75000,
-                location = "YPKP"
-            )
-        )
+
+    private suspend fun getTransactions(): List<Transaction> {
+        var transactionList:  List<List<Transaction>> = emptyList()
+        transactionList = repo.transactions.toList()
+        return transactionList[0]
     }
 
     companion object {
