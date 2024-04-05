@@ -12,6 +12,7 @@ import com.example.ikn.utils.SharedPreferencesManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.ss.usermodel.FillPatternType
@@ -23,18 +24,19 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 
-
 class FileService(): Service() {
-    private lateinit var repo : TransactionRepository
-    private lateinit var prefRepo : PreferenceRepository
-
-    override fun onCreate() {
-        super.onCreate()
-        repo = TransactionRepository.getInstance(
+    private val repo: TransactionRepository by lazy {
+        TransactionRepository.getInstance(
             AppDatabase.getInstance(applicationContext).transactionDao(),
             SharedPreferencesManager(applicationContext)
         )
-        prefRepo = PreferenceRepository.getInstance((SharedPreferencesManager(applicationContext)))
+    }
+    private val prefRepo: PreferenceRepository by lazy {
+        PreferenceRepository.getInstance((SharedPreferencesManager(applicationContext)))
+    }
+
+    override fun onCreate() {
+        super.onCreate()
     }
 
     override fun onDestroy() {
@@ -64,11 +66,14 @@ class FileService(): Service() {
 
     private fun doWork(dir: String, isXlsx: Boolean, isSend: Boolean) {
         CoroutineScope(Dispatchers.IO).launch {
-            val transactions = getTransactions()
+            val transactions = repo.transactions.first()
+            Log.e("FILE SERVICE REPO TEST WORK", transactions.toString())
 
-            if (transactions.isEmpty()) {
-                Log.w(TAG, "Transactions is Empty")
-                return@launch
+            if (transactions != null) {
+                if (transactions.isEmpty()) {
+                    Log.w(TAG, "Transactions is Empty")
+                    return@launch
+                }
             }
 
             val workbook = WorkbookFactory.create(true)
@@ -94,24 +99,26 @@ class FileService(): Service() {
                 sheet.setColumnWidth(i, 15 * 256)
             }
 
-            for (i in transactions.indices) {
-                val row = sheet.createRow(i + 1)
-                val transaction = transactions[i]
+            if (transactions != null) {
+                for (i in transactions.indices) {
+                    val row = sheet.createRow(i + 1)
+                    val transaction = transactions[i]
 
-                val titleCell = row.createCell(0)
-                titleCell.setCellValue(transaction.name)
+                    val titleCell = row.createCell(0)
+                    titleCell.setCellValue(transaction.name)
 
-                val categoryCell = row.createCell(1)
-                categoryCell.setCellValue(transaction.category)
+                    val categoryCell = row.createCell(1)
+                    categoryCell.setCellValue(transaction.category)
 
-                val amountCell = row.createCell(2)
-                amountCell.setCellValue(transaction.amount.toDouble())
+                    val amountCell = row.createCell(2)
+                    amountCell.setCellValue(transaction.amount.toDouble())
 
-                val locationCell = row.createCell(3)
-                locationCell.setCellValue(transaction.location)
+                    val locationCell = row.createCell(3)
+                    locationCell.setCellValue(transaction.location)
 
-                val dateCell = row.createCell(4)
-                dateCell.setCellValue(transaction.date)
+                    val dateCell = row.createCell(4)
+                    dateCell.setCellValue(transaction.date)
+                }
             }
 
             // Save the workbook to a file
@@ -149,35 +156,6 @@ class FileService(): Service() {
             if (isSend) putExtra("SEND_TO", prefRepo.getSignInInfo().first)
         }
         sendBroadcast(intent)
-    }
-    /* TODO: Bikinin Get All untuk Transaction (ZAKI) */
-    private fun getTransactions(): List<Transaction> {
-        return listOf(
-            Transaction(
-                id = 1,
-                date = "01 Apr 2024",
-                category = "Pengeluaran",
-                name = "Kebab Bossman",
-                amount = 30000,
-                location = "Sekeloa"
-            ),
-            Transaction(
-                id = 5,
-                date = "01 Apr 2024",
-                category = "Pengeluaran",
-                name = "PS",
-                amount = 17500,
-                location = "Cisitu"
-            ),
-            Transaction(
-                id = 8,
-                date = "01 Apr 2024",
-                category = "Pengeluaran",
-                name = "Futsal",
-                amount = 75000,
-                location = "YPKP"
-            )
-        )
     }
 
     companion object {

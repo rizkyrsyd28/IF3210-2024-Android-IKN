@@ -127,8 +127,9 @@ class ScanFragment : Fragment() {
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onAttach(context: Context) {
         super.onAttach(context)
-
         networkReceiver = NetworkBroadcastReceiver()
+        requireActivity().registerReceiver(networkReceiver, IntentFilter("NETWORK_STATUS"))
+
         networkReceiver.setConnectedHandler {
             Log.e(TAG, "Connected Handler")
             if (requireActivity().intent.extras?.getBoolean("status")!!) {
@@ -368,8 +369,6 @@ class ScanFragment : Fragment() {
         val dialog: AlertDialog = builder.create()
         dialog.show()
     }
-
-//    private fun
 
     override fun onDestroyView() {
         super.onDestroyView()
