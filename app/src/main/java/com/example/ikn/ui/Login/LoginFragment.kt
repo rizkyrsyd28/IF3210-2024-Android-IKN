@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
+import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -21,6 +22,7 @@ import com.example.ikn.MainActivity
 import com.example.ikn.databinding.FragmentLoginBinding
 import com.example.ikn.repository.PreferenceRepository
 import com.example.ikn.repository.Repository
+import com.example.ikn.service.token.TokenService
 import com.example.ikn.utils.SharedPreferencesManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +32,7 @@ class LoginFragment: Fragment() {
     private lateinit var binding : FragmentLoginBinding
     private lateinit var receiver : BroadcastReceiver
     private lateinit var signInBtn: Button
+    private lateinit var asGuestBtn: Button
 
     private val loginViewModel: LoginViewModel by viewModels { LoginViewModel.Factory }
 
@@ -42,11 +45,16 @@ class LoginFragment: Fragment() {
 
         binding = FragmentLoginBinding.inflate(inflater, container, false)
         signInBtn = binding.signInButton
+        asGuestBtn = binding.asGuestButton
 
+        Log.w(TAG, "DEBUGGGG1")
         if (loginViewModel.isAllowKeepLoggedIn()) {
-            startActivity(Intent(activity, MainActivity::class.java))
+            startActivity(Intent(activity, MainActivity::class.java).apply {
+                putExtra("status", true)
+            })
             activity?.finish()
         }
+        Log.w(TAG, "DEBUGGGG2")
 
         signInBtn.setOnClickListener {
             Log.i("[LOGIN LISTENER]", "In Login Listener")
@@ -58,11 +66,20 @@ class LoginFragment: Fragment() {
                 )
         }
 
+        asGuestBtn.setOnClickListener {
+            startActivity(Intent(requireActivity(), MainActivity::class.java).apply {
+                putExtra("status", false)
+            })
+            requireActivity().finish()
+        }
+
         loginViewModel.authorized.observe(viewLifecycleOwner, Observer { token ->
             if (token) {
                    Handler(Looper.getMainLooper()).postDelayed(
                        {
-                           startActivity(Intent(activity, MainActivity::class.java))
+                           startActivity(Intent(activity, MainActivity::class.java).apply {
+                               putExtra("status", true)
+                           })
                            activity?.finish()
                        }
                    , 1000)
@@ -88,6 +105,9 @@ class LoginFragment: Fragment() {
                 val status = intent.extras?.getBoolean("status")!!
 
                 signInBtn.isEnabled = status
+                signInBtn.visibility = if (status) View.VISIBLE else View.GONE
+                asGuestBtn.isEnabled = !status
+                asGuestBtn.visibility = if (!status) View.VISIBLE else View.GONE
 
                 if (status) showToast("Internet Connected") else showToast("Internet Disconnected")
             }
@@ -113,6 +133,11 @@ class LoginFragment: Fragment() {
         activity?.runOnUiThread {
             Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT, ).show()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.w(TAG, "Destroy Login Fragment")
     }
     companion object {
         fun newInstance() = LoginFragment()

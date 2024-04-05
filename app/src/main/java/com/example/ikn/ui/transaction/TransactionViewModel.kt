@@ -29,12 +29,19 @@ class TransactionViewModel(
     private val _totalAmount = MutableLiveData<Int>()
     val totalAmount: LiveData<Int> get() = _totalAmount
 
+    private val _isOnline = MutableLiveData<Boolean>(false)
+    val isOnline: LiveData<Boolean> get() = _isOnline
+
     init {
         _transactions.observeForever { transactions ->
             var total = 0
             transactions?.forEach { total += it.amount }
             _totalAmount.value = total
         }
+    }
+
+    fun setConnectivity(status: Boolean) {
+        _isOnline.value = status
     }
 
     companion object {

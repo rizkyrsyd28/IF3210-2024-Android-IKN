@@ -102,6 +102,14 @@ class ScanFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        if (!requireActivity().intent.extras?.getBoolean("status")!!) {
+            binding.snapButton.isClickable = false
+            binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
+            binding.uploadButton.isClickable = false
+            binding.uploadButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
+            return
+        }
+
         pickImage()
         if (cameraPermissionsGranted()) {
             Log.i("DEBUG", "permission granted")
@@ -119,24 +127,27 @@ class ScanFragment : Fragment() {
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        networkReceiver = NetworkBroadcastReceiver()
-        requireActivity().registerReceiver(networkReceiver, IntentFilter("NETWORK_STATUS"))
 
+        networkReceiver = NetworkBroadcastReceiver()
         networkReceiver.setConnectedHandler {
-//            Log.e(TAG, "Connected Handler")
-//            binding.snapButton.isClickable = true
-//            binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E0F806"))
-//            binding.uploadButton.isClickable = true
-//            binding.uploadButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E0F806"))
+            Log.e(TAG, "Connected Handler")
+            if (requireActivity().intent.extras?.getBoolean("status")!!) {
+                binding.snapButton.isClickable = true
+                binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E0F806"))
+                binding.uploadButton.isClickable = true
+                binding.uploadButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E0F806"))
+            }
 
         }
         networkReceiver.setDisconnectedHandler {
-//            Log.e(TAG, "Diconnected Handler")
-//            binding.snapButton.isClickable = false
-//            binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
-//            binding.uploadButton.isClickable = false
-//            binding.uploadButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
+            Log.e(TAG, "Diconnected Handler")
+            binding.snapButton.isClickable = false
+            binding.snapButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
+            binding.uploadButton.isClickable = false
+            binding.uploadButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#61FFEB3B"))
         }
+        requireActivity().registerReceiver(networkReceiver, IntentFilter("NETWORK_STATUS"))
+
     }
 
     override fun onDetach() {
@@ -357,6 +368,8 @@ class ScanFragment : Fragment() {
         val dialog: AlertDialog = builder.create()
         dialog.show()
     }
+
+//    private fun
 
     override fun onDestroyView() {
         super.onDestroyView()

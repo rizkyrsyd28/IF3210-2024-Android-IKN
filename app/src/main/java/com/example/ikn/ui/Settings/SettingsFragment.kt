@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -59,6 +61,11 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        if (!requireActivity().intent.extras?.getBoolean("status")!!) {
+            binding.btnSettingsRandomTransactions.visibility = View.GONE
+            binding.btnSettingsSendTransactions.visibility = View.GONE
+        }
+
         settingsViewModel.transactions.observe(viewLifecycleOwner) { transactionList ->
             this.transactionList = transactionList
         }
@@ -79,7 +86,8 @@ class SettingsFragment : Fragment() {
         }
 
         binding.btnLogout.setOnClickListener {
-            settingsViewModel.signOutHandle()
+            if (requireActivity().intent.extras?.getBoolean("status")!!) settingsViewModel.signOutHandle()
+            Log.e(TAG, "Status - ${requireActivity().intent.extras?.getBoolean("status")!!}")
             startActivity(Intent(activity, SplashActivity::class.java))
             activity?.finish()
         }

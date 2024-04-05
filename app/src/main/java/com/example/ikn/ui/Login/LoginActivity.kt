@@ -44,6 +44,7 @@ class LoginActivity : AppCompatActivity() {
         super.onPause()
         stopService(Intent(this, TokenService::class.java))
         stopService(Intent(this, NetworkService::class.java))
+
     }
     override fun onDestroy() {
         super.onDestroy()

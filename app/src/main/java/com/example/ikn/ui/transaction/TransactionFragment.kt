@@ -15,10 +15,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.ikn.MainActivity
 import com.example.ikn.data.AppDatabase
 import com.example.ikn.data.TransactionRepository
 import com.example.ikn.repository.PreferenceRepository
@@ -41,6 +43,9 @@ class TransactionFragment() : Fragment(), TransactionAdapter.OnTransactionItemLo
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val status = requireActivity().intent.extras?.getBoolean("status")!!
+        Log.e("[TRANS]", "status - status")
+        transactionViewModel.setConnectivity(status)
     }
 
     override fun onResume() {
@@ -137,6 +142,10 @@ class TransactionFragment() : Fragment(), TransactionAdapter.OnTransactionItemLo
                 .substringBefore("@")
 
         Log.d("MIGRATION", "Nim: $nim")
+
+        if (!transactionViewModel.isOnline.value!!) {
+            newTransactionFloatingActionButton.visibility = View.GONE
+        }
 
         return rootView
     }
