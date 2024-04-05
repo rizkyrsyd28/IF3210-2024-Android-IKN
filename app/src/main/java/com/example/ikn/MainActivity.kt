@@ -43,6 +43,10 @@ class MainActivity : AppCompatActivity() {
         networkReceiver.setConnectedHandler {
             Log.e(TAG, "connected");
             isConnected = true
+
+            if (!intent.extras?.getBoolean("status")!!) {
+                signOutHandler()
+            }
         }
         networkReceiver.setDisconnectedHandler {
             Log.e(TAG, "disconnected")

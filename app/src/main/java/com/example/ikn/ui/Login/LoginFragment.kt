@@ -47,14 +47,12 @@ class LoginFragment: Fragment() {
         signInBtn = binding.signInButton
         asGuestBtn = binding.asGuestButton
 
-        Log.w(TAG, "DEBUGGGG1")
         if (loginViewModel.isAllowKeepLoggedIn()) {
             startActivity(Intent(activity, MainActivity::class.java).apply {
                 putExtra("status", true)
             })
             activity?.finish()
         }
-        Log.w(TAG, "DEBUGGGG2")
 
         signInBtn.setOnClickListener {
             Log.i("[LOGIN LISTENER]", "In Login Listener")
